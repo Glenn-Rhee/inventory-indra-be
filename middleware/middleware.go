@@ -1,11 +1,15 @@
 package middleware
 
 import (
+	"errors"
+	"fmt"
+	"inventory-indra/helper"
 	"log"
 	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func TokenMiddleware(ctx *gin.Context ) {
@@ -38,6 +42,36 @@ func TokenMiddleware(ctx *gin.Context ) {
 		ctx.Abort()
 		return
 	}
+
+	decoded, err := helper.ValidateJWT(token)
+	if err != nil {
+		if errors.Is(err, jwt.ErrTokenInvalidId) {
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"status": "failed",
+				"message": "Invalid Token!",
+			})
+		} else if errors.Is(err, jwt.ErrTokenExpired){
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"status": "failed",
+				"message": "Token is expired!",
+			})
+		} else if errors.Is(err, jwt.ErrTokenMalformed){
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"status": "failed",
+				"message": "Your session is ended! Kindly login again.",
+			})
+		} else {
+			fmt.Println("Error:", err)
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"status": "failed",
+				"message": "Your token is invalid! Please login!",
+			})
+		}
+		ctx.Abort()
+		return
+	}
+
+	fmt.Println(decoded)
 
 	ctx.Next()
 }
