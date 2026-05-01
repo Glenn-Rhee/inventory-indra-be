@@ -3,7 +3,6 @@ package main
 import (
 	"inventory-indra/db"
 	"inventory-indra/handler"
-	"inventory-indra/middleware"
 	"inventory-indra/repositories"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +14,7 @@ func main() {
 	userHandler := handler.NewUserHandler(userRepo)
 	
 	router := gin.Default()
-	router.GET("/user", middleware.TokenMiddleware, userHandler.FindOneUser)
+	router.POST("/user", userHandler.Register)
 	
 	router.Run(":3178")
 }

@@ -43,7 +43,7 @@ func TokenMiddleware(ctx *gin.Context ) {
 		return
 	}
 
-	decoded, err := helper.ValidateJWT(token)
+	claims, err := helper.ValidateJWT(token)
 	if err != nil {
 		if errors.Is(err, jwt.ErrTokenInvalidId) {
 			ctx.JSON(http.StatusUnauthorized, gin.H{
@@ -71,7 +71,8 @@ func TokenMiddleware(ctx *gin.Context ) {
 		return
 	}
 
-	fmt.Println(decoded)
+	ctx.Set("userId", claims.Id)
+	ctx.Set("username", claims.Username)
 
 	ctx.Next()
 }

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"inventory-indra/model"
 	"inventory-indra/repositories"
 	"net/http"
 
@@ -37,5 +38,39 @@ func (h *UserHandler) FindOneUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"status": "success",
 		"data": user,
+	})
+}
+
+func (h *UserHandler) Register(ctx *gin.Context) {
+	var reqBody model.CreateUser
+
+	if err := ctx.ShouldBindJSON(&reqBody); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status": "failed",
+			"message": "Bad request! Fill username and password!",
+		})
+		return
+	}
+
+	if reqBody.Username == "" || reqBody.Password == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status": "failed",
+			"message": "Bad request! Fill username and password!",
+		})
+		return
+	}
+
+	err := h.repo.CreateUser(reqBody)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status": "failed",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"message": "Successfully signup!",
 	})
 }
