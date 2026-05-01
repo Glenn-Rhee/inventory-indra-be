@@ -15,6 +15,7 @@ func main() {
 	
 	router := gin.Default()
 	router.POST("/user", userHandler.Register)
+	router.POST("/login", userHandler.Login)
 	
-	router.Run(":3178")
+	router.Run(":8000")
 }

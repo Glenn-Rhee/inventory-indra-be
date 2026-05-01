@@ -24,3 +24,9 @@ type CreateUser struct {
 	Username 	string 	`json:"username"`
 	Password 	string	`json:"password"`
 }
+
+type DataUser struct {
+	Id			string
+	Username 	string
+	ImageUrl 	string
+}

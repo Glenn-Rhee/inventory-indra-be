@@ -1,13 +1,11 @@
 package handler
 
 import (
-	"errors"
 	"inventory-indra/model"
 	"inventory-indra/repositories"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type UserHandler struct {
@@ -18,26 +16,30 @@ func NewUserHandler(repo *repositories.UserRepository) *UserHandler {
 	return  &UserHandler{repo: repo}
 }
 
-func (h *UserHandler) FindOneUser(ctx *gin.Context) {
-	user, err := h.repo.FindUser()
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound){
-			ctx.JSON(http.StatusNotFound, gin.H{
-				"status": "failed",
-				"message": "User is not found!",
-			})
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Internal server error!",
+func (h *UserHandler) Login(ctx *gin.Context) {
+	var reqBody model.CreateUser
+
+	if err := ctx.ShouldBindJSON(&reqBody); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"status": "failed",
+			"message": "Bad request! Fill username and password!",
+		})
+		return
+	}
+
+	data, err := h.repo.LoginUser(reqBody)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status": "failed",
+			"message": err.Error(),
 		})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"status": "success",
-		"data": user,
+		"message": "successfully login",
+		"data": data,
 	})
 }
 

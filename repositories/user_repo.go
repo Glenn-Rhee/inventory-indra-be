@@ -15,13 +15,27 @@ type UserRepository struct {
 }
 
 func NewUserRepository(db *gorm.DB) *UserRepository {
-	return  &UserRepository{db: db}
+	return &UserRepository{db: db}
 }
 
-func (r *UserRepository) FindUser() (model.User, error) {
+func (r *UserRepository) LoginUser(dataUser model.CreateUser) (model.DataUser, error) {
 	var user model.User
-	err := r.db.First(&user).Error
-	return user, err
+	result := r.db.Where("username = ?", dataUser.Username).First(&user)
+
+	if errors.Is(result.Error, gorm.ErrRecordNotFound){
+		return model.DataUser{}, errors.New("Username is not found!")
+	}
+
+	err := lib.ComparePass(dataUser.Password, user.Password)
+	if err != nil {
+		return model.DataUser{}, errors.New("Password doesn't match!")
+	}
+
+	return model.DataUser{
+		Id: user.Id,
+		Username: user.Username,
+		ImageUrl: user.ImgUrl,
+	}, nil
 }
 
 func (r *UserRepository) CreateUser(dataUser model.CreateUser) (error) {
@@ -50,6 +64,6 @@ func (r *UserRepository) CreateUser(dataUser model.CreateUser) (error) {
 	if err != nil {
 		return errors.New("An error while creating user!")
 	}
-	
+
 	return nil
 }
