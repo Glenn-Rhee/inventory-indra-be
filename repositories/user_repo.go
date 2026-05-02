@@ -4,6 +4,8 @@ import (
 	"errors"
 	"inventory-indra/lib"
 	"inventory-indra/model"
+	"log"
+	"net/http"
 	"time"
 
 	"github.com/google/uuid"
@@ -81,4 +83,23 @@ func(r *UserRepository) GetOneUser(userId string) (model.DataUser, error){
 		Username: user.Username,
 		ImageUrl: user.ImgUrl,
 	}, nil
+}
+
+func(r *UserRepository) PatchUser(dataUSer model.UpdateUser) (error, int) {
+	resultUser, err := r.GetOneUser(dataUSer.Id)
+	if err != nil {
+		return err, http.StatusNotFound
+	}
+
+	result := r.db.Model(&model.User{}).Where("id = ?", resultUser.Id).Update("img_url", dataUSer.ImageUrl)
+	if result.Error != nil {
+		log.Println(result.Error)
+		return errors.New("An error while update data"), http.StatusInternalServerError
+	}
+
+	if result.RowsAffected == 0 {
+		return errors.New("Failed update data! No rows change!"), http.StatusBadRequest
+	}
+
+	return nil, http.StatusOK
 }

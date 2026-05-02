@@ -31,3 +31,8 @@ type DataUser struct {
 	Username 	string
 	ImageUrl 	string
 }
+
+type UpdateUser struct {
+	Id 			string	`json:"id"`
+	ImageUrl 	string	`json:"imageUrl"`
+}

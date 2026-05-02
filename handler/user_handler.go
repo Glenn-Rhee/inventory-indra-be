@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"inventory-indra/model"
 	"inventory-indra/repositories"
 	"net/http"
@@ -79,9 +78,41 @@ func (h *UserHandler) Register(ctx *gin.Context) {
 }
 
 func (h *UserHandler) GetUser(ctx *gin.Context){
-	fmt.Println(ctx.Get("userId"))
 	ctx.JSON(http.StatusOK, gin.H{
 		"status": "success",
 		"message": "Successfully get one user!",
 	})
+}
+
+func (h *UserHandler) PatchUser(ctx *gin.Context){
+	var reqBody model.UpdateUser
+
+	if err := ctx.ShouldBindJSON(&reqBody); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status": "failed",
+			"message": "Bad request! Fill id user and image url!",
+		})
+		return
+	}
+
+	if reqBody.Id == "" || reqBody.ImageUrl == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status": "failed",
+			"message": "Bad request! Fill id user and image url!",
+		})
+		return
+	}
+
+	err, code := h.repo.PatchUser(reqBody)
+	if err != nil {
+		ctx.JSON(code, gin.H{
+			"status": "failed",
+			"message": err.Error(),
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"message": "Successfully update user",
+	})	
 }
