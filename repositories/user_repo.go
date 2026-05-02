@@ -67,3 +67,18 @@ func (r *UserRepository) CreateUser(dataUser model.CreateUser) (error) {
 
 	return nil
 }
+
+func(r *UserRepository) GetOneUser(userId string) (model.DataUser, error){
+	var user model.User
+
+	result := r.db.Where("id = ?", userId).First(&user)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound){
+		return model.DataUser{}, errors.New("User is not found!")
+	}
+
+	return model.DataUser{
+		Id: user.Id,
+		Username: user.Username,
+		ImageUrl: user.ImgUrl,
+	}, nil
+}

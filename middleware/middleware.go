@@ -72,7 +72,6 @@ func TokenMiddleware(ctx *gin.Context ) {
 	}
 
 	ctx.Set("userId", claims.Id)
-	ctx.Set("username", claims.Username)
 
 	ctx.Next()
 }

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"inventory-indra/model"
 	"inventory-indra/repositories"
 	"net/http"
@@ -74,5 +75,13 @@ func (h *UserHandler) Register(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"status": "success",
 		"message": "Successfully signup!",
+	})
+}
+
+func (h *UserHandler) GetUser(ctx *gin.Context){
+	fmt.Println(ctx.Get("userId"))
+	ctx.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"message": "Successfully get one user!",
 	})
 }

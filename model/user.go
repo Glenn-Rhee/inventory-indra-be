@@ -17,6 +17,7 @@ type User struct {
 type Claims struct {
 	Id 			string `json:"id"`
 	Username	string `json:"username"`
+	ImageUrl 	string `json:"imageUrl"`
 	jwt.RegisteredClaims
 }
 
