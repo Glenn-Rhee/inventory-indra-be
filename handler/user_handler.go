@@ -27,6 +27,14 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 		return
 	}
 
+	if reqBody.Username == "" || reqBody.Password == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status": "failed",
+			"message": "Bad request! Fill username and password!",
+		})
+		return
+	}
+
 	data, err := h.repo.LoginUser(reqBody)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
