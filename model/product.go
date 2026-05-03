@@ -16,3 +16,11 @@ type Product struct {
 	Stock 			*Stock			`gorm:"foreignKey:ProductId;constraint:OnDelete:CASCADE"`
 	Transaction		[]Transaction	`gorm:"foreignKey:ProductId"`
 }
+
+type CreateProduct struct {
+	Name 			string		`json:"name" binding:"required,min=5,max=100"`
+	Category		string		`json:"category" binding:"required,oneof=MEDICINE ESSENTIALS"`
+	Stock			int			`json:"stock" binding:"required,min=1"`
+	PricePerButir	int			`json:"pricePerButir" binding:"required,min=1000"`
+	ExpiredDate		time.Time	`json:"expiredDate" binding:"required"`
+}
