@@ -28,5 +28,6 @@ func main() {
 	router.GET("/user", middleware.TokenMiddleware, userHandler.GetUser)
 
 	router.POST("/product", middleware.HandlerMiddleware, productHandler.CreateProduct)
+	router.GET("/product", middleware.HandlerMiddleware, productHandler.GetProducts)
 	router.Run(":8000")
 }

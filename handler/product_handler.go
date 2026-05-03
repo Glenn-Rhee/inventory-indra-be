@@ -4,6 +4,7 @@ import (
 	"inventory-indra/model"
 	"inventory-indra/repositories"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -39,5 +40,59 @@ func (h *ProductHandler) CreateProduct(ctx *gin.Context){
 	ctx.JSON(http.StatusCreated, gin.H{
 		"status": "success",
 		"message": "Successfully create product!",
+	})
+}
+
+func (h *ProductHandler) GetProducts(ctx *gin.Context){
+	limitQuery, isExist := ctx.GetQuery("limit")
+	if !isExist {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status": "failed",
+			"message": "Please fill limit query!",
+		})
+		return
+	}
+
+ 	limit, err := strconv.Atoi(limitQuery)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status": "failed",
+			"message": "Please fill limit properly!",
+		})
+		return
+	}
+
+	pageQuery, isExist := ctx.GetQuery("page")
+	if !isExist {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status": "failed",
+			"message": "Please fill page query!",
+		})
+		return
+	}
+
+	page, err := strconv.Atoi(pageQuery)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status": "failed",
+			"message": "Please fill page table properly!",
+		})
+		return
+	}
+
+	dataProducts, err := h.repo.GetProducts(limit, page)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"status": "failed",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"message": "Successfully get data products!",
+		"data": dataProducts,
 	})
 }

@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"errors"
+	"inventory-indra/helper"
 	"inventory-indra/model"
 	"net/http"
 	"time"
@@ -13,6 +14,8 @@ import (
 type ProductRepository struct {
 	db *gorm.DB
 }
+
+
 
 func NewProductRepository(db *gorm.DB) *ProductRepository{
 	return  &ProductRepository{db: db}
@@ -99,4 +102,30 @@ func (r *ProductRepository) CreateProduct(dataProduct model.CreateProduct) (erro
 	tx.Commit()
 
 	return nil, http.StatusOK
+}
+
+func (r *ProductRepository) GetProducts(limit int, page int)([]model.GetProducts, error) {
+	var products []model.Product
+
+	offset := (page - 1) * limit
+	result := r.db.Limit(limit).Offset(offset).Find(&products)
+
+	if result.Error != nil {
+		return []model.GetProducts{}, errors.New("An error while get data products. Please try again later!")
+	}
+
+	productResponse := make([]model.GetProducts, len(products)) 
+
+	for i, product := range products {
+		productResponse[i] = model.GetProducts{
+			Id: product.Id,
+			Name: product.Name,
+			Category: product.Category,
+			Price: product.PricePerButir,
+			StatusExpired: helper.GetExpiredStatus(product.ExpiredDate),
+			ExpiredDate: product.ExpiredDate,
+		}
+	}
+
+	return productResponse, nil
 }
