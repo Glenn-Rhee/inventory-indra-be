@@ -6,6 +6,7 @@ import (
 	"inventory-indra/middleware"
 	"inventory-indra/repositories"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,9 +16,14 @@ func main() {
 	userHandler := handler.NewUserHandler(userRepo)
 	
 	router := gin.Default()
+
+	router.Use(cors.Default())
+	
+
 	router.POST("/user", userHandler.Register)
 	router.POST("/login", userHandler.Login)
 	router.PATCH("/user", userHandler.PatchUser)
 	router.GET("/user", middleware.TokenMiddleware, userHandler.GetUser)
+
 	router.Run(":8000")
 }
