@@ -27,6 +27,6 @@ func main() {
 	router.PATCH("/user", userHandler.PatchUser)
 	router.GET("/user", middleware.TokenMiddleware, userHandler.GetUser)
 
-	router.POST("/product", productHandler.CreateProduct)
+	router.POST("/product", middleware.HandlerMiddleware, productHandler.CreateProduct)
 	router.Run(":8000")
 }

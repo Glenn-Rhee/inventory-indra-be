@@ -3,13 +3,16 @@ package middleware
 import (
 	"errors"
 	"fmt"
+	"inventory-indra/db"
 	"inventory-indra/helper"
+	"inventory-indra/model"
 	"log"
 	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"gorm.io/gorm"
 )
 
 func TokenMiddleware(ctx *gin.Context ) {
@@ -73,5 +76,32 @@ func TokenMiddleware(ctx *gin.Context ) {
 
 	ctx.Set("userId", claims.Id)
 
+	ctx.Next()
+}
+
+func HandlerMiddleware(ctx *gin.Context){
+	sessionUserId := ctx.GetHeader("x-user-id")
+	if sessionUserId == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status": "failed",
+			"message": "Please fill header x-user-id",
+		})
+		ctx.Abort()
+		return
+	}
+
+	var user model.User
+
+	result := db.DB.Where("id = ?", sessionUserId).First(&user)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"status": "failed",
+			"message": "Unauthorized! Please make sure you've been login!",
+		})
+		ctx.Abort()
+		return
+	}
+
+	ctx.Set("userId", user.Id)
 	ctx.Next()
 }
