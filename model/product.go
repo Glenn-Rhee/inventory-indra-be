@@ -41,6 +41,11 @@ type CreateProduct struct {
 	ExpiredDate		time.Time	`json:"expiredDate" binding:"required"`
 }
 
+type ProductsResponseGet struct {
+	TotalPages 	int64
+	Product	 	[]GetProducts
+}
+
 type GetProducts struct {
 	Id 				string
 	Name 			string

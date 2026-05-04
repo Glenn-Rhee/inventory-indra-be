@@ -4,6 +4,7 @@ import (
 	"errors"
 	"inventory-indra/helper"
 	"inventory-indra/model"
+	"math"
 	"net/http"
 	"time"
 
@@ -104,17 +105,22 @@ func (r *ProductRepository) CreateProduct(dataProduct model.CreateProduct) (erro
 	return nil, http.StatusOK
 }
 
-func (r *ProductRepository) GetProducts(limit int, page int)([]model.GetProducts, error) {
+func (r *ProductRepository) GetProducts(limit int, page int)(model.ProductsResponseGet, error) {
 	var products []model.Product
 
 	offset := (page - 1) * limit
 	result := r.db.Limit(limit).Offset(offset).Find(&products)
 
 	if result.Error != nil {
-		return []model.GetProducts{}, errors.New("An error while get data products. Please try again later!")
+		return model.ProductsResponseGet{}, errors.New("An error while get data products. Please try again later!")
 	}
 
+	var totalRows int64
+
+	r.db.Model(&model.Product{}).Count(&totalRows)
 	productResponse := make([]model.GetProducts, len(products)) 
+
+	totalPages := int(math.Ceil(float64(totalRows) / float64(limit)))
 
 	for i, product := range products {
 		productResponse[i] = model.GetProducts{
@@ -127,5 +133,9 @@ func (r *ProductRepository) GetProducts(limit int, page int)([]model.GetProducts
 		}
 	}
 
-	return productResponse, nil
+
+	return model.ProductsResponseGet{
+		TotalPages: int64(totalPages),
+		Product: productResponse,
+	}, nil
 }

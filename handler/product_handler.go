@@ -90,9 +90,10 @@ func (h *ProductHandler) GetProducts(ctx *gin.Context){
 		return
 	}
 
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"status": "success",
-		"message": "Successfully get data products!",
+		"message": "Successfully get data products!!",
 		"data": dataProducts,
 	})
 }
