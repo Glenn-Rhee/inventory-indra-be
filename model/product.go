@@ -13,10 +13,17 @@ const (
 	StatusExpired ExpiredStatus = "EXPIRED"
 )
 
+type Category string
+
+const (
+	CategoryMedicine Category = "MEDICINE"
+	CategoryEssentials Category = "ESSENTIALS" 
+)
+
 type Product struct {
 	Id				string 			`gorm:"primaryKey;type:varchar(255)"`
 	Name 			string 			`gorm:"not null"`
-	Category 		string 			`gorm:"not null"`
+	Category 		Category 		`gorm:"not null"`
 	PricePerButir	int 
 	ExpiredDate 	time.Time		`gorm:"not null"`
 	CreatedAt		time.Time
@@ -28,7 +35,7 @@ type Product struct {
 
 type CreateProduct struct {
 	Name 			string		`json:"name" binding:"required,min=5,max=100"`
-	Category		string		`json:"category" binding:"required,oneof=MEDICINE ESSENTIALS"`
+	Category		Category	`json:"category" binding:"required,oneof=MEDICINE ESSENTIALS"`
 	Stock			int			`json:"stock" binding:"required,min=1"`
 	PricePerButir	int			`json:"pricePerButir" binding:"required,min=1000"`
 	ExpiredDate		time.Time	`json:"expiredDate" binding:"required"`
@@ -37,7 +44,7 @@ type CreateProduct struct {
 type GetProducts struct {
 	Id 				string
 	Name 			string
-	Category 		string
+	Category 		Category
 	Price			int
 	StatusExpired	ExpiredStatus
 	ExpiredDate		time.Time
