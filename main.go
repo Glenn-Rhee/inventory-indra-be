@@ -16,6 +16,7 @@ func main() {
 
 	userRepo := repositories.NewUserRepository(db)
 	userHandler := handler.NewUserHandler(userRepo)
+
 	productRepo := repositories.NewProductRepository(db)
 	productHandler := handler.NewProductHandler(productRepo)
 
@@ -37,6 +38,7 @@ func main() {
 
 	router.POST("/product", middleware.HandlerMiddleware, productHandler.CreateProduct)
 	router.GET("/product", middleware.HandlerMiddleware, productHandler.GetProducts)
+	router.DELETE("/product", middleware.HandlerMiddleware, productHandler.DeleteProduct)
 
 	router.Run(":8000")
 }

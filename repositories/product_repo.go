@@ -145,3 +145,22 @@ func (r *ProductRepository) GetProducts(limit int, page int, filter string)(mode
 		Product: productResponse,
 	}, nil
 }
+
+func (r *ProductRepository) DeleteProduct(productId string) (error, int) {
+	var product model.Product
+	resultProduct := r.db.Where("id = ?", productId).First(&product)
+	if errors.Is(resultProduct.Error, gorm.ErrRecordNotFound) {
+		return errors.New("Product is not found!"), http.StatusNotFound
+	}
+
+	resultSoftDelete := r.db.Model(&model.Product{}).Where("id = ?", map[string]interface{}{
+		"is_active": false,
+		"deleted_at": time.Now(),
+	})
+
+	if resultSoftDelete.Error != nil {
+		return errors.New("An error while delete product! Please try again later!"), http.StatusInternalServerError
+	}
+
+	return nil, http.StatusOK
+}

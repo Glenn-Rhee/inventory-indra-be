@@ -100,3 +100,28 @@ func (h *ProductHandler) GetProducts(ctx *gin.Context){
 		"data": dataProducts,
 	})
 }
+
+func (h *ProductHandler) DeleteProduct(ctx *gin.Context){
+	productId, isExist := ctx.GetQuery("productId")
+	if !isExist || productId == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status": "failed",
+			"message": "Please fill product id!",
+		})
+		return
+	}
+
+	err, code := h.repo.DeleteProduct(productId)
+	if err != nil {
+		ctx.JSON(code, gin.H{
+			"status": "failed",
+			"message": "Please fill product id!",
+		})
+		return
+	}
+
+	ctx.JSON(code, gin.H{
+		"status": "success",
+		"message": "Successfully Delete product!",
+	})
+}
