@@ -6,7 +6,6 @@ import (
 	"inventory-indra/model"
 	"math"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -113,7 +112,7 @@ func (r *ProductRepository) GetProducts(limit int, page int, filter string)(mode
 	query := r.db.Model(&model.Product{})
 
 	if filter != "" {
-		query = query.Where("name LIKE ? OR category::text LIKE ?", "%"+ filter +"%", "%"+ strings.ToUpper(filter) +"%")
+		query = query.Where("name ILIKE ? OR category::text ILIKE ?", "%"+ filter +"%", "%"+ filter +"%")
 	}
 
 	var totalRows int64
