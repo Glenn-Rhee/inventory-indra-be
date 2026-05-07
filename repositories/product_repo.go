@@ -6,6 +6,7 @@ import (
 	"inventory-indra/model"
 	"math"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -105,11 +106,21 @@ func (r *ProductRepository) CreateProduct(dataProduct model.CreateProduct) (erro
 	return nil, http.StatusOK
 }
 
-func (r *ProductRepository) GetProducts(limit int, page int)(model.ProductsResponseGet, error) {
-	var products []model.Product
+func (r *ProductRepository) GetProducts(limit int, page int, filter string)(model.ProductsResponseGet, error) {
+	var products []model.Product	
 
 	offset := (page - 1) * limit
-	result := r.db.Limit(limit).Offset(offset).Find(&products)
+	query := r.db.Model(&model.Product{})
+
+	if filter != "" {
+		query = query.Where("name LIKE ? OR category::text LIKE ?", "%"+ filter +"%", "%"+ strings.ToUpper(filter) +"%")
+	}
+
+	result := query.Limit(limit).Offset(offset).Find(&products)
+
+	if result.Error != nil {
+		return model.ProductsResponseGet{}, errors.New("An error while get data products. Please try again later!")
+	}
 
 	if result.Error != nil {
 		return model.ProductsResponseGet{}, errors.New("An error while get data products. Please try again later!")

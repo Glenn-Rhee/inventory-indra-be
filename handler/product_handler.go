@@ -80,7 +80,10 @@ func (h *ProductHandler) GetProducts(ctx *gin.Context){
 		return
 	}
 
-	dataProducts, err := h.repo.GetProducts(limit, page)
+	filter, _ := ctx.GetQuery("filter")
+
+
+	dataProducts, err := h.repo.GetProducts(limit, page, filter)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
