@@ -28,6 +28,8 @@ type Product struct {
 	ExpiredDate 	time.Time		`gorm:"not null"`
 	CreatedAt		time.Time
 	UpdatedAt		time.Time
+	DeletedAt		time.Time
+	IsActive		bool
 
 	Stock 			*Stock			`gorm:"foreignKey:ProductId;constraint:OnDelete:CASCADE"`
 	Transaction		[]Transaction	`gorm:"foreignKey:ProductId"`
