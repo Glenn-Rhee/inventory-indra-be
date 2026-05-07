@@ -109,7 +109,7 @@ func (r *ProductRepository) GetProducts(limit int, page int, filter string)(mode
 	var products []model.Product	
 
 	offset := (page - 1) * limit
-	query := r.db.Model(&model.Product{})
+	query := r.db.Model(&model.Product{}).Where("is_active = ?", true)
 
 	if filter != "" {
 		query = query.Where("name ILIKE ? OR category::text ILIKE ?", "%"+ filter +"%", "%"+ filter +"%")
@@ -139,7 +139,6 @@ func (r *ProductRepository) GetProducts(limit int, page int, filter string)(mode
 		}
 	}
 
-
 	return model.ProductsResponseGet{
 		TotalPages: int64(totalPages),
 		Product: productResponse,
@@ -153,7 +152,7 @@ func (r *ProductRepository) DeleteProduct(productId string) (error, int) {
 		return errors.New("Product is not found!"), http.StatusNotFound
 	}
 
-	resultSoftDelete := r.db.Model(&model.Product{}).Where("id = ?", map[string]interface{}{
+	resultSoftDelete := r.db.Model(&model.Product{}).Where("id = ?", product.Id).Updates( map[string]interface{}{
 		"is_active": false,
 		"deleted_at": time.Now(),
 	})
