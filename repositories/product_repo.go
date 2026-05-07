@@ -116,19 +116,15 @@ func (r *ProductRepository) GetProducts(limit int, page int, filter string)(mode
 		query = query.Where("name LIKE ? OR category::text LIKE ?", "%"+ filter +"%", "%"+ strings.ToUpper(filter) +"%")
 	}
 
+	var totalRows int64
+	query.Count(&totalRows)
+	
 	result := query.Limit(limit).Offset(offset).Find(&products)
 
 	if result.Error != nil {
 		return model.ProductsResponseGet{}, errors.New("An error while get data products. Please try again later!")
 	}
 
-	if result.Error != nil {
-		return model.ProductsResponseGet{}, errors.New("An error while get data products. Please try again later!")
-	}
-
-	var totalRows int64
-
-	r.db.Model(&model.Product{}).Count(&totalRows)
 	productResponse := make([]model.GetProducts, len(products)) 
 
 	totalPages := int(math.Ceil(float64(totalRows) / float64(limit)))
