@@ -115,7 +115,7 @@ func (h *ProductHandler) DeleteProduct(ctx *gin.Context){
 	if err != nil {
 		ctx.JSON(code, gin.H{
 			"status": "failed",
-			"message": "Please fill product id!",
+			"message": err.Error(),
 		})
 		return
 	}
