@@ -39,7 +39,7 @@ type CreateProduct struct {
 	Name 			string		`json:"name" binding:"required,min=5,max=100"`
 	Category		Category	`json:"category" binding:"required,oneof=MEDICINE ESSENTIALS"`
 	Stock			int			`json:"stock" binding:"required,min=1"`
-	PricePerButir	int			`json:"pricePerButir" binding:"required,min=1000"`
+	PricePerButir	int			`json:"price" binding:"required,min=100"`
 	ExpiredDate		time.Time	`json:"expiredDate" binding:"required"`
 }
 

@@ -14,6 +14,7 @@ import (
 var DB *gorm.DB
 
 func Connect()*gorm.DB {
+	log.Println("Connecting to db...")
 	err := godotenv.Load()
 	if err != nil {
 		log.Println("Error load dotenv file:", err.Error())

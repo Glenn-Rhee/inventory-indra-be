@@ -5,6 +5,7 @@ import (
 	"inventory-indra/handler"
 	"inventory-indra/middleware"
 	"inventory-indra/repositories"
+	"log"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -12,6 +13,7 @@ import (
 )
 
 func main() {
+	log.Println("Server is starting...")
 	db := db.Connect()
 
 	userRepo := repositories.NewUserRepository(db)
