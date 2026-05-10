@@ -79,6 +79,7 @@ func (r *ProductRepository) CreateProduct(dataProduct model.CreateProduct) (erro
 		ExpiredDate: dataProduct.ExpiredDate,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
+		IsActive: true,
 	}
 
 	err := tx.Create(&product).Error

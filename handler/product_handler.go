@@ -3,7 +3,6 @@ package handler
 import (
 	"inventory-indra/model"
 	"inventory-indra/repositories"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -20,8 +19,8 @@ func NewProductHandler(repo *repositories.ProductRepository) *ProductHandler {
 
 func (h *ProductHandler) CreateProduct(ctx *gin.Context){
 	var reqBody model.CreateProduct
+
 	if err := ctx.ShouldBindJSON(&reqBody); err !=nil{
-		log.Println(ctx.Request.Body)
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"status": "failed",
 			"message": "Bad request! Fill field of product properly!",
