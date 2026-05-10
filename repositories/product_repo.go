@@ -119,7 +119,7 @@ func (r *ProductRepository) GetProducts(limit int, page int, filter string)(mode
 	var totalRows int64
 	query.Count(&totalRows)
 	
-	result := query.Limit(limit).Offset(offset).Find(&products)
+	result := query.Order("name ASC").Limit(limit).Offset(offset).Find(&products)
 
 	if result.Error != nil {
 		return model.ProductsResponseGet{}, errors.New("An error while get data products. Please try again later!")
