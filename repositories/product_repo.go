@@ -164,3 +164,32 @@ func (r *ProductRepository) DeleteProduct(productId string) (error, int) {
 
 	return nil, http.StatusOK
 }
+
+func (r *ProductRepository) EditProduct(dataReq model.PatchProduct) (error, int) {
+	var product model.Product
+	result := r.db.Where("id = ?", dataReq.Id).First(&product)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return errors.New("Data product is not found!"), http.StatusNotFound
+	} 
+
+	if result.Error != nil {
+		return errors.New("Internal server error!"), http.StatusInternalServerError
+	}
+
+	result = r.db.Model(&model.Product{}).Where("id = ?", dataReq.Id).Updates(model.Product{
+		Name: dataReq.Name,
+		Category: dataReq.Category,
+		PricePerButir: dataReq.PricePerButir,
+		UpdatedAt: time.Now(),
+	})
+
+	if result.Error != nil {
+		return errors.New("An error while update data! Please try again later."), http.StatusInternalServerError
+	}
+
+	if result.RowsAffected == 0 {
+		return errors.New("Failed update data! Please try again later"), http.StatusBadRequest
+	}
+
+	return nil, http.StatusOK
+}	

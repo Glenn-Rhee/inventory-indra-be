@@ -16,8 +16,8 @@ const (
 type Category string
 
 const (
-	CategoryMedicine Category = "MEDICINE"
-	CategoryEssentials Category = "ESSENTIALS" 
+	CategoryMedicine 	Category = "MEDICINE"
+	CategoryEssentials 	Category = "ESSENTIALS" 
 )
 
 type Product struct {
@@ -57,4 +57,11 @@ type GetProducts struct {
 	ExpiredDate		time.Time
 	DeletedAt		time.Time
 	IsActive		bool
+}
+
+type PatchProduct struct {
+	Id				string		`json:"id" binding:"required"`
+	Name			string		`json:"name" binding:"required,min=5,max=100"`
+	Category		Category	`json:"category" binding:"required,oneof=MEDICINE ESSENTIALS"`
+	PricePerButir	int			`json:"price" binding:"required,min=100"`
 }

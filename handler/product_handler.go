@@ -3,6 +3,7 @@ package handler
 import (
 	"inventory-indra/model"
 	"inventory-indra/repositories"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -123,5 +124,32 @@ func (h *ProductHandler) DeleteProduct(ctx *gin.Context){
 	ctx.JSON(code, gin.H{
 		"status": "success",
 		"message": "Successfully Delete product!",
+	})
+}
+
+func (h *ProductHandler) PatchProduct(ctx *gin.Context) {
+	var reqBody model.PatchProduct
+
+	if err := ctx.ShouldBindJSON(&reqBody); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status": "failed",
+			"message": "Bad request! Fill field of product properly!",
+		})
+		return
+	}
+
+	err, code := h.repo.EditProduct(reqBody)
+	if err != nil {
+		log.Println("Error: ", err.Error())
+		ctx.JSON(code, gin.H{
+			"status": "failed",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(code, gin.H{
+		"status": "success",
+		"message": "Successfully edit data product!",
 	})
 }

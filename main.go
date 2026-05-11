@@ -41,6 +41,7 @@ func main() {
 	router.POST("/product", middleware.HandlerMiddleware, productHandler.CreateProduct)
 	router.GET("/product", middleware.HandlerMiddleware, productHandler.GetProducts)
 	router.DELETE("/product", middleware.HandlerMiddleware, productHandler.DeleteProduct)
+	router.PATCH("/product", middleware.HandlerMiddleware, productHandler.PatchProduct)
 
 	router.Run(":8000")
 }
