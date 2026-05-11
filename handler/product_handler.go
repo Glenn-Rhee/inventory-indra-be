@@ -131,6 +131,7 @@ func (h *ProductHandler) PatchProduct(ctx *gin.Context) {
 	var reqBody model.PatchProduct
 
 	if err := ctx.ShouldBindJSON(&reqBody); err != nil {
+		log.Println("Error request body:", err.Error())
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"status": "failed",
 			"message": "Bad request! Fill field of product properly!",
