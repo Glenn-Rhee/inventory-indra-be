@@ -22,6 +22,9 @@ func main() {
 	productRepo := repositories.NewProductRepository(db)
 	productHandler := handler.NewProductHandler(productRepo)
 
+	stockRepo := repositories.NewStockRepository(db)
+	stockHandler := handler.NewStockHandler(stockRepo)
+
 	router := gin.Default()
 
 	router.Use(cors.New(cors.Config{
@@ -42,6 +45,8 @@ func main() {
 	router.GET("/product", middleware.HandlerMiddleware, productHandler.GetProducts)
 	router.DELETE("/product", middleware.HandlerMiddleware, productHandler.DeleteProduct)
 	router.PATCH("/product", middleware.HandlerMiddleware, productHandler.PatchProduct)
+
+	router.GET("/stock", middleware.HandlerMiddleware, stockHandler.GetDataStocks)
 
 	router.Run(":8000")
 }
