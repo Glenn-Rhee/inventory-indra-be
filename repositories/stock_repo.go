@@ -4,6 +4,7 @@ import (
 	"errors"
 	"inventory-indra/helper"
 	"inventory-indra/model"
+	"math"
 	"net/http"
 
 	"gorm.io/gorm"
@@ -36,16 +37,18 @@ func (r *StockRepository) GetStocks(params GetStocksParams) (model.GetStocks, er
 		query = query.Where("products.name ILIKE ?", "%" + params.Filter + "%")
 	}
 
-	var totalStock int64
-	query.Count(&totalStock)
-	result := query.Order("products.name ASC").Limit(params.Limit).Offset(offset).Find(&products).Count(&totalStock)
+	var totalRows int64
+	query.Count(&totalRows)
+
+	result := query.Order("products.name ASC").Limit(params.Limit).Offset(offset).Find(&products)
 
 	if result.Error != nil {
 		return model.GetStocks{}, errors.New("An error while get data"), http.StatusInternalServerError
 	}
 
 	productsResponse := make([]model.GetProductStock, len(products))
-	
+	totalPages := int(math.Ceil(float64(totalRows) / float64(params.Limit)))
+
 	for i, product := range products {
 		statusExpired := helper.GetExpiredStatus(product.ExpiredDate)
 		productsResponse[i] = model.GetProductStock{
@@ -68,9 +71,10 @@ func (r *StockRepository) GetStocks(params GetStocksParams) (model.GetStocks, er
 	}
 
 	return model.GetStocks{
-		TotalProduct: totalStock,
+		TotalProduct: totalRows,
 		TotalLowStock: totalLowStock,
 		TotalProductExpired: totalProductExpired,
 		Products: productsResponse,
+		TotalPages: totalPages,
 	}, nil, http.StatusOK
 }

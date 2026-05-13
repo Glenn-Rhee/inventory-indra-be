@@ -25,7 +25,8 @@ type GetStocks struct {
 	TotalProduct 		int64
 	TotalLowStock		int
 	TotalProductExpired	int
-	Products			[]GetProductStock			 		
+	Products			[]GetProductStock			 
+	TotalPages		 	int		
 }
 
 type GetProductStock struct {
