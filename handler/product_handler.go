@@ -83,7 +83,6 @@ func (h *ProductHandler) GetProducts(ctx *gin.Context){
 
 	filter, _ := ctx.GetQuery("filter")
 
-
 	dataProducts, err := h.repo.GetProducts(limit, page, filter)
 
 	if err != nil {
