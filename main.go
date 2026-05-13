@@ -51,6 +51,6 @@ func main() {
 
 	router.GET("/stock", middleware.HandlerMiddleware, stockHandler.GetDataStocks)
 
-	
+	router.POST("/transaction", middleware.HandlerMiddleware, transactionHandler.CreateTransaction)
 	router.Run(":8000")
 }

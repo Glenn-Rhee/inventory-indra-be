@@ -2,7 +2,6 @@ package handler
 
 import (
 	"inventory-indra/repositories"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -18,7 +17,6 @@ func NewStockHandler(repo *repositories.StockRepository) *StockHandler {
 }
 
 func (h *StockHandler) GetDataStocks(ctx *gin.Context){
-	log.Println("cihuy")
 	limitQuery, isExist := ctx.GetQuery("limit")
 	if !isExist {
 		ctx.JSON(http.StatusBadRequest, gin.H{
