@@ -26,3 +26,21 @@ type CreateTransaction struct {
 	Price			int					`json:"price" binding:"required,min=100"`
 	TotalPrice		int					`json:"totalPrice" binding:"required,min=100"`
 }
+
+type GetTransaction struct {
+	TotalTransaction	int
+	TotalRevenue		int
+	TotalPurchase		int
+	TotalPages			int
+	Transactions		[]TransactionResponse
+}
+
+type TransactionResponse struct {
+	Id 					string
+	ProductName			string
+	TransactionType		TransactionType
+	Quantity			int
+	Price				int64
+	TotalPrice			int64
+	TransactionDate		time.Time
+}
