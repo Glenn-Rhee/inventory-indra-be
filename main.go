@@ -25,6 +25,9 @@ func main() {
 	stockRepo := repositories.NewStockRepository(db)
 	stockHandler := handler.NewStockHandler(stockRepo)
 
+	transactionRepo := repositories.NewTransactionRepository(db)
+	transactionHandler := handler.NewTransactionHandler(transactionRepo)
+
 	router := gin.Default()
 
 	router.Use(cors.New(cors.Config{
@@ -48,5 +51,6 @@ func main() {
 
 	router.GET("/stock", middleware.HandlerMiddleware, stockHandler.GetDataStocks)
 
+	
 	router.Run(":8000")
 }
