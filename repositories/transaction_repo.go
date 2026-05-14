@@ -121,7 +121,6 @@ func (r *TransactionRepository) GetTransaction(params GetTransactionParams) (mod
 			totalPurchase += totalPrice
 		}
 
-		totalRevenue += totalPrice
 		transactionsResponse[i] = model.TransactionResponse{
 			Id: transaction.Id,
 			ProductName: transaction.Product.Name,
