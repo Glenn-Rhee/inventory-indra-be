@@ -85,7 +85,8 @@ func (r *TransactionRepository) GetTransaction(params GetTransactionParams) (mod
 	var totalRows int64
 	offset := (params.Page - 1) * params.Limit
 	query := r.db.Model(&model.Transaction{}).
-		Joins("JOIN products ON products.id = transactions.product_id")
+		Joins("JOIN products ON products.id = transactions.product_id").
+		Preload("Product")
 
 	if params.Filter != "" {
 		query = query.Where(
@@ -97,12 +98,12 @@ func (r *TransactionRepository) GetTransaction(params GetTransactionParams) (mod
 	}
 
 	query.Count(&totalRows)
-
+	
 	result := query.Order("transactions.created_at ASC").
 				Limit(params.Limit).
 				Offset(offset).
 				Find(&transactions)
-
+	
 	if result.Error != nil {
 		log.Println("Error while get data transaction:", result.Error.Error())
 		return model.GetTransaction{}, errors.New("An error while get data transaction! Please try again later!"), http.StatusInternalServerError
