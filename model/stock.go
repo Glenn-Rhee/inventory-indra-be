@@ -33,6 +33,7 @@ type GetProductStock struct {
 	Id				string
 	Name			string
 	Stock			int
+	Price 			int64
 	StatusStock		StatusStock
 	StatusExpired	ExpiredStatus
 	ExpiredDate		time.Time

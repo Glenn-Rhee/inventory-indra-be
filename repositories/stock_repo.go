@@ -59,6 +59,7 @@ func (r *StockRepository) GetStocks(params GetStocksParams) (model.GetStocks, er
 			ExpiredDate: product.ExpiredDate,
 			StatusStock: helper.GetStatusStock(product.Stock.StockPerButir),
 			LastUpdate: product.Stock.LastUpdate,
+			Price: int64(product.PricePerButir),
 		}
 
 		if statusExpired == model.StatusExpired {
