@@ -35,7 +35,6 @@ func (r *TransactionRepository) CreateTransaction(data model.CreateTransaction) 
 		return errors.New("An error while create transaction! Please try again later"), http.StatusInternalServerError
 	}
 
-
 	createdAt := time.Now()
 	var idTransaction = createdAt.Format("TX-02012006-150405")
 
@@ -59,7 +58,13 @@ func (r *TransactionRepository) CreateTransaction(data model.CreateTransaction) 
 		return fmt.Errorf("Out of stock! Maximum stock is %d", product.Stock.StockPerButir), http.StatusBadRequest
 	}
 
-	stockLeft := product.Stock.StockPerButir - data.Quantity
+	var stockLeft int
+	if data.TransactionType == model.TransactionIN {
+		stockLeft = product.Stock.StockPerButir - data.Quantity
+	} else {
+		stockLeft = product.Stock.StockPerButir + data.Quantity
+	}
+
 
 	result = tx.Model(&model.Stock{}).Where("product_id = ?", product.Id).Updates(model.Stock{
 		StockPerButir: stockLeft,
@@ -68,6 +73,24 @@ func (r *TransactionRepository) CreateTransaction(data model.CreateTransaction) 
 		tx.Rollback()
 		log.Println("Error while update stock:", result.Error.Error())
 		return errors.New("An error while create transaction! Please try again later"), http.StatusInternalServerError
+	}
+
+	if data.TransactionType == model.TransactionOUT {
+		if data.ExpiredDate == nil {
+			tx.Rollback()
+			return errors.New("Expired date is required!"), http.StatusBadRequest
+		}
+
+		result = tx.Model(&model.Product{}).Where("id = ?", product.Id).Updates(model.Product{
+			ExpiredDate: *data.ExpiredDate,
+			PricePerButir: data.Price,
+		})
+
+		if result.Error != nil {
+			tx.Rollback()
+			log.Println("Error while update expired date:", result.Error.Error())
+			return errors.New("An error while create transaction! Please try again later"), http.StatusInternalServerError
+		}
 	}
 
 	tx.Commit()

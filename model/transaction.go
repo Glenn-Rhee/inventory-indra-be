@@ -24,7 +24,7 @@ type CreateTransaction struct {
 	TransactionType TransactionType		`json:"transactionType" binding:"required,oneof=IN OUT"`
 	Quantity		int					`json:"quantity" binding:"required,min=1"`
 	Price			int					`json:"price" binding:"required,min=100"`
-	TotalPrice		int					`json:"totalPrice" binding:"required,min=100"`
+	ExpiredDate		*time.Time			`json:"expiredDate"`
 }
 
 type GetTransaction struct {
