@@ -68,6 +68,7 @@ func (r *TransactionRepository) CreateTransaction(data model.CreateTransaction) 
 
 	result = tx.Model(&model.Stock{}).Where("product_id = ?", product.Id).Updates(model.Stock{
 		StockPerButir: stockLeft,
+		LastUpdate: time.Now(),
 	})
 	if result.Error != nil {
 		tx.Rollback()
