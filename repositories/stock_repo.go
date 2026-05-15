@@ -40,7 +40,7 @@ func (r *StockRepository) GetStocks(params GetStocksParams) (model.GetStocks, er
 	var totalRows int64
 	query.Count(&totalRows)
 
-	result := query.Order("products.name ASC").Limit(params.Limit).Offset(offset).Find(&products)
+	result := query.Order("stock_per_butir ASC").Limit(params.Limit).Offset(offset).Find(&products)
 
 	if result.Error != nil {
 		return model.GetStocks{}, errors.New("An error while get data"), http.StatusInternalServerError
