@@ -54,7 +54,7 @@ func (r *TransactionRepository) CreateTransaction(data model.CreateTransaction) 
 		return errors.New("An error while create transaction! Please try again later"), http.StatusInternalServerError
 	}
 
-	if data.Quantity > product.Stock.StockPerButir {
+	if data.TransactionType == model.TransactionIN && data.Quantity > product.Stock.StockPerButir {
 		tx.Rollback()
 		return fmt.Errorf("Out of stock! Maximum stock is %d", product.Stock.StockPerButir), http.StatusBadRequest
 	}
