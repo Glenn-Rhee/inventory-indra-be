@@ -99,7 +99,7 @@ func (r *TransactionRepository) GetTransaction(params GetTransactionParams) (mod
 
 	query.Count(&totalRows)
 	
-	result := query.Order("transactions.created_at ASC").
+	result := query.Order("transactions.created_at DESC").
 				Limit(params.Limit).
 				Offset(offset).
 				Find(&transactions)
