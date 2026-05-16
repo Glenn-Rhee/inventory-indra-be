@@ -28,6 +28,9 @@ func main() {
 	transactionRepo := repositories.NewTransactionRepository(db)
 	transactionHandler := handler.NewTransactionHandler(transactionRepo)
 
+	statsRepo := repositories.NewStatsRepository(db)
+	statsHandler := handler.NewStatsHandler(statsRepo)
+
 	router := gin.Default()
 
 	router.Use(cors.New(cors.Config{
@@ -53,5 +56,7 @@ func main() {
 
 	router.POST("/transaction", middleware.HandlerMiddleware, transactionHandler.CreateTransaction)
 	router.GET("/transaction", middleware.HandlerMiddleware, transactionHandler.GetTransaction)
+
+	router.GET("/stats", middleware.HandlerMiddleware, statsHandler.GetStatistik)
 	router.Run(":8000")
 }
