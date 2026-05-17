@@ -104,3 +104,29 @@ func (r *StatsRepository) GetStatistik(rangeType int) (model.StastResponse, erro
 		TotalTransactions: int32(totalTransaction),
 	}, nil, http.StatusOK
 }
+
+func (r *StatsRepository) GetDataMedicine() ([]model.DataMedicineResponse, error, int) {
+	var products []model.Product
+	result := r.db.Model(&model.Product{}).
+		Joins("JOIN stocks ON stocks.product_id = products.id").
+		Preload("Stock").Find(&products)
+	
+	if result.Error != nil {
+		return []model.DataMedicineResponse{}, errors.New("An error while get data product"), http.StatusInternalServerError
+	}
+
+	dataMedicineResponse := make([]model.DataMedicineResponse, len(products))
+	for i, product := range products {
+		dataMedicineResponse[i] = model.DataMedicineResponse{
+			Id: product.Id,
+			ProductName: product.Name,
+			Category: product.Category,
+			PricePerButir: product.Stock.StockPerButir,
+			ExpiredDate: product.ExpiredDate,
+			StockPerButir: product.Stock.StockPerButir,
+			LastUpdate: product.Stock.LastUpdate,
+		}
+	}
+
+	return dataMedicineResponse, nil, http.StatusOK
+}

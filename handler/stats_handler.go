@@ -58,3 +58,20 @@ func (h *StatsHandler) GetStatistik(ctx *gin.Context) {
 		"data": data,
 	})
 }
+
+func (h *StatsHandler) GetDataMedicineExcel(ctx *gin.Context) {
+	data, err, code := h.repo.GetDataMedicine()
+	if err != nil {
+		ctx.JSON(code, gin.H{
+			"status": "failed",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(code, gin.H{
+		"status": "success",
+		"message": "Successfully get data medicine",
+		"data": data,
+	})
+}
