@@ -16,7 +16,7 @@ type DataChart struct {
 	Out  int
 }
 
-type DataMedicineResponse struct {
+type DataProductResponse struct {
 	Id            string
 	ProductName   string
 	Category      Category

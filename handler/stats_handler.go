@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"inventory-indra/helper"
 	"inventory-indra/repositories"
 	"net/http"
 	"strconv"
@@ -69,9 +70,14 @@ func (h *StatsHandler) GetDataProductExcel(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(code, gin.H{
-		"status": "success",
-		"message": "Successfully get data medicine",
-		"data": data,
-	})
+	err = helper.ConvertToExcel(data, ctx)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"status": "failed",
+			"message": "An error while create excel file",
+		})
+
+		return
+	}
 }
