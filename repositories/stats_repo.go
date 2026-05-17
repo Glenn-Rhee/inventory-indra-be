@@ -105,7 +105,7 @@ func (r *StatsRepository) GetStatistik(rangeType int) (model.StastResponse, erro
 	}, nil, http.StatusOK
 }
 
-func (r *StatsRepository) GetDataMedicine() ([]model.DataMedicineResponse, error, int) {
+func (r *StatsRepository) GetDataProduct() ([]model.DataMedicineResponse, error, int) {
 	var products []model.Product
 	result := r.db.Model(&model.Product{}).
 		Joins("JOIN stocks ON stocks.product_id = products.id").

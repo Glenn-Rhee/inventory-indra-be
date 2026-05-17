@@ -58,6 +58,6 @@ func main() {
 	router.GET("/transaction", middleware.HandlerMiddleware, transactionHandler.GetTransaction)
 
 	router.GET("/stats", middleware.HandlerMiddleware, statsHandler.GetStatistik)
-	router.GET("/stats/medicine", middleware.HandlerMiddleware, statsHandler.GetDataMedicineExcel)
+	router.GET("/stats/medicine", middleware.HandlerMiddleware, statsHandler.GetDataProductExcel)
 	router.Run(":8000")
 }

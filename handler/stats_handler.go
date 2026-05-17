@@ -59,8 +59,8 @@ func (h *StatsHandler) GetStatistik(ctx *gin.Context) {
 	})
 }
 
-func (h *StatsHandler) GetDataMedicineExcel(ctx *gin.Context) {
-	data, err, code := h.repo.GetDataMedicine()
+func (h *StatsHandler) GetDataProductExcel(ctx *gin.Context) {
+	data, err, code := h.repo.GetDataProduct()
 	if err != nil {
 		ctx.JSON(code, gin.H{
 			"status": "failed",
