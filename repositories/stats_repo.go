@@ -5,6 +5,7 @@ import (
 	"inventory-indra/model"
 	"log"
 	"net/http"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -17,12 +18,25 @@ func NewStatsRepository(db *gorm.DB) *StatsRepository {
 	return &StatsRepository{db: db}
 }
 
-func (r *StatsRepository) GetStatistik() (model.StastResponse, error, int) {
+func (r *StatsRepository) GetStatistik(rangeType int) (model.StastResponse, error, int) {
 	var transaction []model.Transaction
 	var totalTransaction int64
+	var cutOffDate time.Time
+	now := time.Now()
+
+	switch rangeType {
+	case 7:
+		cutOffDate = now.AddDate(0, 0, -7)
+	case 30:
+		cutOffDate = now.AddDate(0, 0, -30)
+	default:
+		cutOffDate = now.AddDate(0, -3, 0)
+	}
+
 	query := r.db.Model(&model.Transaction{}).
 		Joins("JOIN products ON products.id = transactions.product_id").
-		Preload("Product")
+		Preload("Product").
+		Where("transactions.created_at >= ?", cutOffDate)
 	
 	query.Count(&totalTransaction)
 	
