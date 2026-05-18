@@ -9,15 +9,15 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func ConvertToExcel(products []model.DataProductResponse, ctx *gin.Context) (error) {
+func TransactionsConvertToExcel(products []model.DataProductResponse, ctx *gin.Context) error {
 	f := excelize.NewFile()
 	sheet := "Data Products"
 	f.NewSheet(sheet)
 	f.DeleteSheet("Sheet1")
 
 	headerStyle, _ := f.NewStyle(&excelize.Style{
-		Font: &excelize.Font{Bold: true, Color: "FFFFFF"},
-		Fill: excelize.Fill{Type: "pattern", Color: []string{"4472C4"}, Pattern: 1},
+		Font:      &excelize.Font{Bold: true, Color: "FFFFFF"},
+		Fill:      excelize.Fill{Type: "pattern", Color: []string{"4472C4"}, Pattern: 1},
 		Alignment: &excelize.Alignment{Horizontal: "center"},
 	})
 
@@ -39,13 +39,56 @@ func ConvertToExcel(products []model.DataProductResponse, ctx *gin.Context) (err
 		f.SetCellValue(sheet, fmt.Sprintf("G%d", row), product.LastUpdate.Format("2006-01-02 15:04:05"))
 	}
 
-    cols := []string{"A", "B", "C", "D", "E", "F", "G"}
-    widths := []float64{15, 25, 20, 15, 15, 12, 20}
+	cols := []string{"A", "B", "C", "D", "E", "F", "G"}
+	widths := []float64{15, 25, 20, 15, 15, 12, 20}
 	for i, col := range cols {
 		f.SetColWidth(sheet, col, col, widths[i])
 	}
 
 	fileName := fmt.Sprintf("Data-Obat-%s.xlsx", time.Now().Format("20060102"))
+	ctx.Header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	ctx.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileName))
+
+	return f.Write(ctx.Writer)
+}
+
+func ReportsConvertToExcel(tranasactions []model.TransactionResponse, ctx *gin.Context) error {
+	f := excelize.NewFile()
+	sheet := "Data Transaction Reports"
+	f.NewSheet(sheet)
+	f.DeleteSheet("Sheet1")
+
+	headerStyle, _ := f.NewStyle(&excelize.Style{
+		Font:      &excelize.Font{Bold: true, Color: "FFFFFF"},
+		Fill:      excelize.Fill{Type: "pattern", Color: []string{"4472C4"}, Pattern: 1},
+		Alignment: &excelize.Alignment{Horizontal: "center"},
+	})
+
+	headers := []string{"Transaction ID", "Nama Produk", "Tipe Transaksi", "Kuantitas", "Harga/Butir", "Total Harga", "Tanggal Transaksi"}
+	for i, h := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		f.SetCellValue(sheet, cell, h)
+		f.SetCellStyle(sheet, cell, cell, headerStyle)
+	}
+
+	for rowIdx, tx := range tranasactions {
+		row := rowIdx + 2
+		f.SetCellValue(sheet, fmt.Sprintf("A%d", row), tx.Id)
+		f.SetCellValue(sheet, fmt.Sprintf("B%d", row), tx.ProductName)
+		f.SetCellValue(sheet, fmt.Sprintf("C%d", row), tx.TransactionType)
+		f.SetCellValue(sheet, fmt.Sprintf("D%d", row), tx.Quantity)
+		f.SetCellValue(sheet, fmt.Sprintf("E%d", row), tx.Price)
+		f.SetCellValue(sheet, fmt.Sprintf("F%d", row), tx.TotalPrice)
+		f.SetCellValue(sheet, fmt.Sprintf("G%d", row), tx.TransactionDate.Format("2006-01-02 15:04:05"))
+	}
+
+	cols := []string{"A", "B", "C", "D", "E", "F", "G"}
+	widths := []float64{30, 25, 20, 15, 15, 15, 20}
+	for i, col := range cols {
+		f.SetColWidth(sheet, col, col, widths[i])
+	}
+
+	fileName := fmt.Sprintf("Data-Transaction-%s.xlsx", time.Now().Format("20060102"))
 	ctx.Header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 	ctx.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileName))
 
