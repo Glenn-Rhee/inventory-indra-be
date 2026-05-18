@@ -37,9 +37,9 @@ func (r *StatsRepository) GetStatistik(rangeType int) (model.StastResponse, erro
 		Joins("JOIN products ON products.id = transactions.product_id").
 		Preload("Product").
 		Where("transactions.created_at >= ?", cutOffDate)
-	
+
 	query.Count(&totalTransaction)
-	
+
 	result := query.Order("transactions.created_at ASC").Find(&transaction)
 	if result.Error != nil {
 		log.Println("Error while get data transaction:", result.Error.Error())
@@ -97,10 +97,10 @@ func (r *StatsRepository) GetStatistik(rangeType int) (model.StastResponse, erro
 	}
 
 	return model.StastResponse{
-		TotalRevenue: totalRevenue,
-		Stocks: int32(availableStock),
-		DataChart: dataChart,
-		BestSeller: bestSeller,
+		TotalRevenue:      totalRevenue,
+		Stocks:            int32(availableStock),
+		DataChart:         dataChart,
+		BestSeller:        bestSeller,
 		TotalTransactions: int32(totalTransaction),
 	}, nil, http.StatusOK
 }
@@ -110,7 +110,7 @@ func (r *StatsRepository) GetDataProduct() ([]model.DataProductResponse, error, 
 	result := r.db.Model(&model.Product{}).
 		Joins("JOIN stocks ON stocks.product_id = products.id").
 		Preload("Stock").Find(&products)
-	
+
 	if result.Error != nil {
 		return []model.DataProductResponse{}, errors.New("An error while get data product"), http.StatusInternalServerError
 	}
@@ -118,15 +118,47 @@ func (r *StatsRepository) GetDataProduct() ([]model.DataProductResponse, error, 
 	dataMedicineResponse := make([]model.DataProductResponse, len(products))
 	for i, product := range products {
 		dataMedicineResponse[i] = model.DataProductResponse{
-			Id: product.Id,
-			ProductName: product.Name,
-			Category: product.Category,
+			Id:            product.Id,
+			ProductName:   product.Name,
+			Category:      product.Category,
 			PricePerButir: product.Stock.StockPerButir,
-			ExpiredDate: product.ExpiredDate,
+			ExpiredDate:   product.ExpiredDate,
 			StockPerButir: product.Stock.StockPerButir,
-			LastUpdate: product.Stock.LastUpdate,
+			LastUpdate:    product.Stock.LastUpdate,
 		}
 	}
 
 	return dataMedicineResponse, nil, http.StatusOK
+}
+
+func (r *StatsRepository) GetDataReports() ([]model.TransactionResponse, error, int) {
+	var transactions []model.Transaction
+
+	result := r.db.Model(&model.Transaction{}).
+		Joins("JOIN products ON products.id = transactions.product_id").
+		Preload("Product").
+		Order("transactions.created_at DESC").
+		Find(&transactions)
+
+	if result.Error != nil {
+		log.Println("Error while get data transactions:", result.Error.Error())
+		return []model.TransactionResponse{}, errors.New("An error occured while get"), http.StatusInternalServerError
+	}
+
+	transactionsResponse := make([]model.TransactionResponse, len(transactions))
+
+	for i, transaction := range transactions {
+		totalPrice := transaction.Quantity * transaction.Product.PricePerButir
+		transactionsResponse[i] = model.TransactionResponse{
+			Id:              transaction.Id,
+			ProductName:     transaction.Product.Name,
+			TransactionType: transaction.TransactionType,
+			Quantity:        transaction.Quantity,
+			Price:           int64(transaction.Product.PricePerButir),
+			TotalPrice:      int64(totalPrice),
+			TransactionDate: transaction.CreatedAt,
+		}
+	}
+
+	return transactionsResponse, nil, http.StatusOK
 }
