@@ -4,8 +4,10 @@ import (
 	"errors"
 	"inventory-indra/helper"
 	"inventory-indra/model"
+	"log"
 	"math"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/google/uuid"
@@ -16,11 +18,11 @@ type ProductRepository struct {
 	db *gorm.DB
 }
 
-func NewProductRepository(db *gorm.DB) *ProductRepository{
-	return  &ProductRepository{db: db}
+func NewProductRepository(db *gorm.DB) *ProductRepository {
+	return &ProductRepository{db: db}
 }
 
-func (r *ProductRepository) CreateProduct(dataProduct model.CreateProduct) (error, int){
+func (r *ProductRepository) CreateProduct(dataProduct model.CreateProduct) (error, int) {
 	var product model.Product
 
 	result := r.db.Where("name = ?", dataProduct.Name).First(&product)
@@ -33,10 +35,10 @@ func (r *ProductRepository) CreateProduct(dataProduct model.CreateProduct) (erro
 		}
 		// Update product
 		result = tx.Model(&model.Product{}).Where("id = ?", product.Id).Updates(model.Product{
-			Category: dataProduct.Category,
+			Category:      dataProduct.Category,
 			PricePerButir: dataProduct.PricePerButir,
-			ExpiredDate: dataProduct.ExpiredDate,
-			UpdatedAt: time.Now(),
+			ExpiredDate:   dataProduct.ExpiredDate,
+			UpdatedAt:     time.Now(),
 		})
 
 		if result.Error != nil {
@@ -52,7 +54,7 @@ func (r *ProductRepository) CreateProduct(dataProduct model.CreateProduct) (erro
 		// update stock
 		resultStock := tx.Model(&model.Stock{}).Where("product_id = ?", product.Id).Updates(model.Stock{
 			StockPerButir: dataProduct.Stock,
-			LastUpdate: time.Now(),
+			LastUpdate:    time.Now(),
 		})
 
 		if resultStock.Error != nil {
@@ -70,14 +72,14 @@ func (r *ProductRepository) CreateProduct(dataProduct model.CreateProduct) (erro
 	}
 
 	product = model.Product{
-		Id: uuid.New().String(),
-		Name: dataProduct.Name,
-		Category: dataProduct.Category,
+		Id:            uuid.New().String(),
+		Name:          dataProduct.Name,
+		Category:      dataProduct.Category,
 		PricePerButir: dataProduct.PricePerButir,
-		ExpiredDate: dataProduct.ExpiredDate,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		IsActive: true,
+		ExpiredDate:   dataProduct.ExpiredDate,
+		CreatedAt:     time.Now(),
+		UpdatedAt:     time.Now(),
+		IsActive:      true,
 	}
 
 	err := tx.Create(&product).Error
@@ -87,10 +89,10 @@ func (r *ProductRepository) CreateProduct(dataProduct model.CreateProduct) (erro
 	}
 
 	stock := model.Stock{
-		Id: uuid.New().String(),
+		Id:            uuid.New().String(),
 		StockPerButir: dataProduct.Stock,
-		LastUpdate: time.Now(),
-		ProductId: product.Id,
+		LastUpdate:    time.Now(),
+		ProductId:     product.Id,
 	}
 
 	err = tx.Create(&stock).Error
@@ -104,43 +106,79 @@ func (r *ProductRepository) CreateProduct(dataProduct model.CreateProduct) (erro
 	return nil, http.StatusOK
 }
 
-func (r *ProductRepository) GetProducts(limit int, page int, filter string)(model.ProductsResponseGet, error) {
-	var products []model.Product	
+func (r *ProductRepository) GetProducts(limit int, page int, filter string) (model.ProductsResponseGet, error) {
+	var products []model.Product
 
 	offset := (page - 1) * limit
-	query := r.db.Model(&model.Product{}).Where("is_active = ?", true)
+	query := r.db.Model(&model.Product{}).
+		Where("products.is_active = ?", true).
+		Preload("Transaction")
 
 	if filter != "" {
-		query = query.Where("name ILIKE ? OR category::text ILIKE ?", "%"+ filter +"%", "%"+ filter +"%")
+		query = query.Where("name ILIKE ? OR category::text ILIKE ?", "%"+filter+"%", "%"+filter+"%")
 	}
 
 	var totalRows int64
 	query.Count(&totalRows)
-	
-	result := query.Order("name ASC").Limit(limit).Offset(offset).Find(&products)
 
+	result := query.Order("name ASC").Limit(limit).Offset(offset).Find(&products)
+	log.Println(products[0].Transaction)
 	if result.Error != nil {
 		return model.ProductsResponseGet{}, errors.New("An error while get data products. Please try again later!")
 	}
 
-	productResponse := make([]model.GetProducts, len(products)) 
+	productResponse := make([]model.GetProducts, len(products))
 
 	totalPages := int(math.Ceil(float64(totalRows) / float64(limit)))
 
+	sixMonthAgo := time.Now().AddDate(0, -6, 0)
 	for i, product := range products {
+		transactionMap := make(map[string]*model.TransactionProduct)
+		for _, trx := range product.Transaction {
+			if trx.CreatedAt.Before(sixMonthAgo) {
+				continue
+			}
+
+			month := trx.CreatedAt.Format("2006-01")
+			if _, exists := transactionMap[month]; !exists {
+				transactionMap[month] = &model.TransactionProduct{
+					Month: trx.CreatedAt.Format("January 2006"),
+				}
+			}
+
+			switch trx.TransactionType {
+			case model.TransactionIN:
+				total := trx.Quantity * product.PricePerButir
+				transactionMap[month].In += total
+			case model.TransactionOUT:
+				total := trx.Quantity * product.PricePerButir
+				transactionMap[month].Out += total
+			}
+		}
+
+		transactions := make([]model.TransactionProduct, 0, len(transactionMap))
+		for _, trx := range transactionMap {
+			transactions = append(transactions, *trx)
+		}
+
+		sort.Slice(transactions, func(i, j int) bool {
+			return transactions[i].Month < transactions[j].Month
+		})
+
 		productResponse[i] = model.GetProducts{
-			Id: product.Id,
-			Name: product.Name,
-			Category: product.Category,
-			Price: product.PricePerButir,
+			Id:            product.Id,
+			Name:          product.Name,
+			Category:      product.Category,
+			Price:         product.PricePerButir,
 			StatusExpired: helper.GetExpiredStatus(product.ExpiredDate),
-			ExpiredDate: product.ExpiredDate,
+			ExpiredDate:   product.ExpiredDate,
+			Transactions:  transactions,
 		}
 	}
 
 	return model.ProductsResponseGet{
 		TotalPages: int64(totalPages),
-		Product: productResponse,
+		Product:    productResponse,
 	}, nil
 }
 
@@ -151,8 +189,8 @@ func (r *ProductRepository) DeleteProduct(productId string) (error, int) {
 		return errors.New("Product is not found!"), http.StatusNotFound
 	}
 
-	resultSoftDelete := r.db.Model(&model.Product{}).Where("id = ?", product.Id).Updates( map[string]interface{}{
-		"is_active": false,
+	resultSoftDelete := r.db.Model(&model.Product{}).Where("id = ?", product.Id).Updates(map[string]interface{}{
+		"is_active":  false,
 		"deleted_at": time.Now(),
 	})
 
@@ -168,17 +206,17 @@ func (r *ProductRepository) EditProduct(dataReq model.PatchProduct) (error, int)
 	result := r.db.Where("id = ?", dataReq.Id).First(&product)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return errors.New("Data product is not found!"), http.StatusNotFound
-	} 
+	}
 
 	if result.Error != nil {
 		return errors.New("Internal server error!"), http.StatusInternalServerError
 	}
 
 	result = r.db.Model(&model.Product{}).Where("id = ?", dataReq.Id).Updates(model.Product{
-		Name: dataReq.Name,
-		Category: dataReq.Category,
+		Name:          dataReq.Name,
+		Category:      dataReq.Category,
 		PricePerButir: dataReq.PricePerButir,
-		UpdatedAt: time.Now(),
+		UpdatedAt:     time.Now(),
 	})
 
 	if result.Error != nil {
@@ -190,4 +228,4 @@ func (r *ProductRepository) EditProduct(dataReq model.PatchProduct) (error, int)
 	}
 
 	return nil, http.StatusOK
-}	
+}

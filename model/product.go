@@ -57,6 +57,13 @@ type GetProducts struct {
 	ExpiredDate		time.Time
 	DeletedAt		time.Time
 	IsActive		bool
+	Transactions 	[]TransactionProduct
+}
+
+type TransactionProduct struct {
+	Month 			string
+	In				int
+	Out 			int
 }
 
 type PatchProduct struct {
