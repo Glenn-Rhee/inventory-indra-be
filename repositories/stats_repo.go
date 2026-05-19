@@ -45,6 +45,7 @@ func (r *StatsRepository) GetStatistik(rangeType int) (model.StastResponse, erro
 		log.Println("Error while get data transaction:", result.Error.Error())
 		return model.StastResponse{}, errors.New("An error while get data! Please try again later."), http.StatusInternalServerError
 	}
+
 	var totalRevenue int64 = 0
 	var availableStock = 0
 
@@ -88,7 +89,7 @@ func (r *StatsRepository) GetStatistik(rangeType int) (model.StastResponse, erro
 	}
 
 	result = r.db.Model(&model.Stock{}).
-		Select("SUM(stock_per_butir)").
+		Select("COALESCE(SUM(stock_per_butir), 0)").
 		Scan(&availableStock)
 
 	if result.Error != nil {
