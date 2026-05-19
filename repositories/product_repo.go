@@ -4,6 +4,7 @@ import (
 	"errors"
 	"inventory-indra/helper"
 	"inventory-indra/model"
+	"log"
 	"math"
 	"net/http"
 	"sort"
@@ -24,8 +25,14 @@ func NewProductRepository(db *gorm.DB) *ProductRepository {
 func (r *ProductRepository) CreateProduct(dataProduct model.CreateProduct) (error, int) {
 	var product model.Product
 
-	result := r.db.Where("name = ?", dataProduct.Name).First(&product)
+	result := r.db.Where("products.name = ?", dataProduct.Name).
+		Joins("JOIN stocks ON stocks.product_id = products.id").
+		Preload("Stock").
+		First(&product)
+
 	tx := r.db.Begin()
+
+	idTransaction := time.Now().Format("TX-02012006-150405")
 
 	if !errors.Is(result.Error, gorm.ErrRecordNotFound) {
 
@@ -66,6 +73,22 @@ func (r *ProductRepository) CreateProduct(dataProduct model.CreateProduct) (erro
 			return errors.New("Failed update data! Please try again later"), http.StatusBadRequest
 		}
 
+		// Create transaction
+		transaction := model.Transaction{
+			Id:              idTransaction,
+			ProductId:       product.Id,
+			TransactionType: model.TransactionIN,
+			Quantity:        helper.AbsDiff(dataProduct.Stock, product.Stock.StockPerButir),
+			CreatedAt:       time.Now(),
+		}
+
+		resultTransaction := tx.Model(&transaction).Create(transaction)
+		if resultTransaction.Error != nil {
+			tx.Rollback()
+			log.Println("An error while create transaction:", resultTransaction.Error.Error())
+			return errors.New("Failed update data! Please try again later."), http.StatusInternalServerError
+		}
+
 		tx.Commit()
 		return nil, http.StatusCreated
 	}
@@ -98,6 +121,21 @@ func (r *ProductRepository) CreateProduct(dataProduct model.CreateProduct) (erro
 	if err != nil {
 		tx.Rollback()
 		return errors.New("Failed create stock! Please try again later!"), http.StatusInternalServerError
+	}
+
+	transaction := model.Transaction{
+		Id:              idTransaction,
+		ProductId:       product.Id,
+		TransactionType: model.TransactionOUT,
+		Quantity:        dataProduct.Stock,
+		CreatedAt:       time.Now(),
+	}
+
+	resultTransaction := tx.Model(&transaction).Create(transaction)
+	if resultTransaction.Error != nil {
+		tx.Rollback()
+		log.Println("An error while create transaction:", resultTransaction.Error.Error())
+		return errors.New("Failed update data! Please try again later."), http.StatusInternalServerError
 	}
 
 	tx.Commit()
