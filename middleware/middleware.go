@@ -15,12 +15,12 @@ import (
 	"gorm.io/gorm"
 )
 
-func TokenMiddleware(ctx *gin.Context ) {
+func TokenMiddleware(ctx *gin.Context) {
 	token := ctx.GetHeader("Authorization")
 	log.Println("Token Auth:", token)
 	if token == "" {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"status": "failed",
+			"status":  "failed",
 			"message": "Please fill header Authorization!",
 		})
 		ctx.Abort()
@@ -29,7 +29,7 @@ func TokenMiddleware(ctx *gin.Context ) {
 	parts := strings.Split(token, " ")
 	if len(parts) < 2 {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"status": "failed",
+			"status":  "failed",
 			"message": "Invalid Token Format!",
 		})
 		ctx.Abort()
@@ -39,7 +39,7 @@ func TokenMiddleware(ctx *gin.Context ) {
 	token = parts[1]
 	if token == "" {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"status": "failed",
+			"status":  "failed",
 			"message": "Unathorized! Please login to your account first!",
 		})
 		ctx.Abort()
@@ -50,23 +50,23 @@ func TokenMiddleware(ctx *gin.Context ) {
 	if err != nil {
 		if errors.Is(err, jwt.ErrTokenInvalidId) {
 			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"status": "failed",
+				"status":  "failed",
 				"message": "Invalid Token!",
 			})
-		} else if errors.Is(err, jwt.ErrTokenExpired){
+		} else if errors.Is(err, jwt.ErrTokenExpired) {
 			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"status": "failed",
+				"status":  "failed",
 				"message": "Token is expired!",
 			})
-		} else if errors.Is(err, jwt.ErrTokenMalformed){
+		} else if errors.Is(err, jwt.ErrTokenMalformed) {
 			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"status": "failed",
+				"status":  "failed",
 				"message": "Your session is ended! Kindly login again.",
 			})
 		} else {
 			fmt.Println("Error:", err)
 			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"status": "failed",
+				"status":  "failed",
 				"message": "Your token is invalid! Please login!",
 			})
 		}
@@ -79,11 +79,11 @@ func TokenMiddleware(ctx *gin.Context ) {
 	ctx.Next()
 }
 
-func HandlerMiddleware(ctx *gin.Context){
+func HandlerMiddleware(ctx *gin.Context) {
 	sessionUserId := ctx.GetHeader("x-user-id")
 	if sessionUserId == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status": "failed",
+			"status":  "failed",
 			"message": "Please fill header x-user-id",
 		})
 		ctx.Abort()
@@ -95,7 +95,7 @@ func HandlerMiddleware(ctx *gin.Context){
 	result := db.DB.Where("id = ?", sessionUserId).First(&user)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"status": "failed",
+			"status":  "failed",
 			"message": "Unauthorized! Please make sure you've been login!",
 		})
 		ctx.Abort()
