@@ -55,8 +55,6 @@ type GetProducts struct {
 	Price			int
 	StatusExpired	ExpiredStatus
 	ExpiredDate		time.Time
-	DeletedAt		time.Time
-	IsActive		bool
 	Transactions 	[]TransactionProduct
 }
 

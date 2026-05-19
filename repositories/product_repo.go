@@ -4,7 +4,6 @@ import (
 	"errors"
 	"inventory-indra/helper"
 	"inventory-indra/model"
-	"log"
 	"math"
 	"net/http"
 	"sort"
@@ -122,7 +121,6 @@ func (r *ProductRepository) GetProducts(limit int, page int, filter string) (mod
 	query.Count(&totalRows)
 
 	result := query.Order("name ASC").Limit(limit).Offset(offset).Find(&products)
-	log.Println(products[0].Transaction)
 	if result.Error != nil {
 		return model.ProductsResponseGet{}, errors.New("An error while get data products. Please try again later!")
 	}
