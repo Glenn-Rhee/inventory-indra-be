@@ -6,15 +6,21 @@ import (
 	"inventory-indra/middleware"
 	"inventory-indra/repositories"
 	"log"
+	"os"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	log.Println("Server is starting...")
 	db := db.Connect()
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error load dotenv file:", err.Error())
+	}
 
 	userRepo := repositories.NewUserRepository(db)
 	userHandler := handler.NewUserHandler(userRepo)
@@ -34,14 +40,14 @@ func main() {
 	router := gin.Default()
 
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:		[]string{"http://localhost:3000"},
-		AllowMethods: 		[]string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowHeaders: 		[]string{"Origin", "Content-Type", "Authorization", "Accept", "x-user-id"},
-		ExposeHeaders:		[]string{"Content-Length", "Content-Disposition"},
-		AllowCredentials: 	true,
-    	MaxAge:           	12 * time.Hour,
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Accept", "x-user-id"},
+		ExposeHeaders:    []string{"Content-Length", "Content-Disposition"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
 	}))
-	
+
 	router.POST("/user", userHandler.Register)
 	router.POST("/login", userHandler.Login)
 	router.PATCH("/user", userHandler.PatchUser)
@@ -60,5 +66,5 @@ func main() {
 	router.GET("/stats", middleware.HandlerMiddleware, statsHandler.GetStatistik)
 	router.GET("/stats/medicine", middleware.HandlerMiddleware, statsHandler.GetDataProductExcel)
 	router.GET("/stats/reports", middleware.HandlerMiddleware, statsHandler.GetDataReportsExcel)
-	router.Run(":8000")
+	router.Run(":" + os.Getenv("PORT"))
 }
