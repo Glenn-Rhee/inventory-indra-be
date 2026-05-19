@@ -62,7 +62,9 @@ func (r *StatsRepository) GetStatistik(rangeType int) (model.StastResponse, erro
 			chartOrder = append(chartOrder, dateKey)
 		}
 
-		bestSellerMap[tx.Product.Name] += tx.Quantity
+		if tx.TransactionType == model.TransactionIN {
+			bestSellerMap[tx.Product.Name] += tx.Quantity
+		}
 
 		amount := tx.Quantity * tx.Product.PricePerButir
 
