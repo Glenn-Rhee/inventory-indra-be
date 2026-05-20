@@ -110,7 +110,7 @@ func (r *TransactionRepository) GetTransaction(params GetTransactionParams) (mod
 	offset := (params.Page - 1) * params.Limit
 	query := r.db.Model(&model.Transaction{}).
 		Joins("JOIN products ON products.id = transactions.product_id").
-		
+		Where()
 		Preload("Product")
 
 	if params.Filter != "" {
