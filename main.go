@@ -6,21 +6,15 @@ import (
 	"inventory-indra/middleware"
 	"inventory-indra/repositories"
 	"log"
-	"os"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
 	log.Println("Server is starting...")
 	db := db.Connect()
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error load dotenv file:", err.Error())
-	}
 
 	userRepo := repositories.NewUserRepository(db)
 	userHandler := handler.NewUserHandler(userRepo)
@@ -66,5 +60,5 @@ func main() {
 	router.GET("/stats", middleware.HandlerMiddleware, statsHandler.GetStatistik)
 	router.GET("/stats/medicine", middleware.HandlerMiddleware, statsHandler.GetDataProductExcel)
 	router.GET("/stats/reports", middleware.HandlerMiddleware, statsHandler.GetDataReportsExcel)
-	router.Run(":" + os.Getenv("PORT"))
+	router.Run(":8080")
 }
