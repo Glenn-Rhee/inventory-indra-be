@@ -18,6 +18,10 @@ func Connect() *gorm.DB {
 	if _, err := os.Stat(".env"); err == nil {
 		err := godotenv.Load()
 		if err != nil {
+			log.Println("DB_HOST:", os.Getenv("DB_HOST"))
+			log.Println("DB_PORT:", os.Getenv("DB_PORT"))
+			log.Println("DB_NAME:", os.Getenv("DB_NAME"))
+			log.Println("DB_USER:", os.Getenv("DB_USER"))
 			log.Println("Error load dotenv file:", err.Error())
 		}
 	}
