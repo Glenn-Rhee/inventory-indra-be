@@ -29,7 +29,9 @@ type Product struct {
 	UpdatedAt     time.Time
 	DeletedAt     time.Time
 	IsActive      bool
+	UserId        string `gorm:"type:varchar(255)"`
 
+	User        *User         `gorm:"foreignKey:UserId"`
 	Stock       *Stock        `gorm:"foreignKey:ProductId;constraint:OnDelete:CASCADE"`
 	Transaction []Transaction `gorm:"foreignKey:ProductId"`
 }
