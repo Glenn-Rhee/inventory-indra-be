@@ -18,46 +18,64 @@ func NewProductHandler(repo *repositories.ProductRepository) *ProductHandler {
 	return &ProductHandler{repo: repo}
 }
 
-func (h *ProductHandler) CreateProduct(ctx *gin.Context){
+func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
 	var reqBody model.CreateProduct
 
-	if err := ctx.ShouldBindJSON(&reqBody); err !=nil{
+	if err := ctx.ShouldBindJSON(&reqBody); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status": "failed",
+			"status":  "failed",
 			"message": "Bad request! Fill field of product properly!",
 		})
 		return
 	}
 
-	err, code := h.repo.CreateProduct(reqBody)
+	valUserId, isExist := ctx.Get("userId")
+	if !isExist {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"status":  "failed",
+			"message": "Unauthorized! Please make sure you've been login!",
+		})
+		return
+	}
+
+	userId, ok := valUserId.(string)
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "failed",
+			"message": "Invalid user id!",
+		})
+		return
+	}
+
+	err, code := h.repo.CreateProduct(reqBody, userId)
 	if err != nil {
 		ctx.JSON(code, gin.H{
-			"status": "failed",
+			"status":  "failed",
 			"message": err.Error(),
 		})
 		return
 	}
 
 	ctx.JSON(http.StatusCreated, gin.H{
-		"status": "success",
+		"status":  "success",
 		"message": "Successfully create product!",
 	})
 }
 
-func (h *ProductHandler) GetProducts(ctx *gin.Context){
+func (h *ProductHandler) GetProducts(ctx *gin.Context) {
 	limitQuery, isExist := ctx.GetQuery("limit")
 	if !isExist {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status": "failed",
+			"status":  "failed",
 			"message": "Please fill limit query!",
 		})
 		return
 	}
 
- 	limit, err := strconv.Atoi(limitQuery)
+	limit, err := strconv.Atoi(limitQuery)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status": "failed",
+			"status":  "failed",
 			"message": "Please fill limit properly!",
 		})
 		return
@@ -66,7 +84,7 @@ func (h *ProductHandler) GetProducts(ctx *gin.Context){
 	pageQuery, isExist := ctx.GetQuery("page")
 	if !isExist {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status": "failed",
+			"status":  "failed",
 			"message": "Please fill page query!",
 		})
 		return
@@ -75,7 +93,7 @@ func (h *ProductHandler) GetProducts(ctx *gin.Context){
 	page, err := strconv.Atoi(pageQuery)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status": "failed",
+			"status":  "failed",
 			"message": "Please fill page table properly!",
 		})
 		return
@@ -87,25 +105,24 @@ func (h *ProductHandler) GetProducts(ctx *gin.Context){
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"status": "failed",
+			"status":  "failed",
 			"message": err.Error(),
 		})
 		return
 	}
 
-
 	ctx.JSON(http.StatusOK, gin.H{
-		"status": "success",
+		"status":  "success",
 		"message": "Successfully get data products!!",
-		"data": dataProducts,
+		"data":    dataProducts,
 	})
 }
 
-func (h *ProductHandler) DeleteProduct(ctx *gin.Context){
+func (h *ProductHandler) DeleteProduct(ctx *gin.Context) {
 	productId, isExist := ctx.GetQuery("productId")
 	if !isExist || productId == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status": "failed",
+			"status":  "failed",
 			"message": "Please fill product id!",
 		})
 		return
@@ -114,14 +131,14 @@ func (h *ProductHandler) DeleteProduct(ctx *gin.Context){
 	err, code := h.repo.DeleteProduct(productId)
 	if err != nil {
 		ctx.JSON(code, gin.H{
-			"status": "failed",
+			"status":  "failed",
 			"message": err.Error(),
 		})
 		return
 	}
 
 	ctx.JSON(code, gin.H{
-		"status": "success",
+		"status":  "success",
 		"message": "Successfully Delete product!",
 	})
 }
@@ -132,7 +149,7 @@ func (h *ProductHandler) PatchProduct(ctx *gin.Context) {
 	if err := ctx.ShouldBindJSON(&reqBody); err != nil {
 		log.Println("Error request body:", err.Error())
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status": "failed",
+			"status":  "failed",
 			"message": "Bad request! Fill field of product properly!",
 		})
 		return
@@ -142,14 +159,14 @@ func (h *ProductHandler) PatchProduct(ctx *gin.Context) {
 	if err != nil {
 		log.Println("Error: ", err.Error())
 		ctx.JSON(code, gin.H{
-			"status": "failed",
+			"status":  "failed",
 			"message": err.Error(),
 		})
 		return
 	}
 
 	ctx.JSON(code, gin.H{
-		"status": "success",
+		"status":  "success",
 		"message": "Successfully edit data product!",
 	})
 }

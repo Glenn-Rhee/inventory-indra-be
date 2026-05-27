@@ -22,7 +22,7 @@ func NewProductRepository(db *gorm.DB) *ProductRepository {
 	return &ProductRepository{db: db}
 }
 
-func (r *ProductRepository) CreateProduct(dataProduct model.CreateProduct) (error, int) {
+func (r *ProductRepository) CreateProduct(dataProduct model.CreateProduct, userId string) (error, int) {
 	var product model.Product
 
 	result := r.db.Where("products.name = ?", dataProduct.Name).
@@ -45,6 +45,7 @@ func (r *ProductRepository) CreateProduct(dataProduct model.CreateProduct) (erro
 			PricePerButir: dataProduct.PricePerButir,
 			ExpiredDate:   dataProduct.ExpiredDate,
 			UpdatedAt:     time.Now(),
+			UserId:        userId,
 		})
 
 		if result.Error != nil {
@@ -102,6 +103,7 @@ func (r *ProductRepository) CreateProduct(dataProduct model.CreateProduct) (erro
 		CreatedAt:     time.Now(),
 		UpdatedAt:     time.Now(),
 		IsActive:      true,
+		UserId:        userId,
 	}
 
 	err := tx.Create(&product).Error
