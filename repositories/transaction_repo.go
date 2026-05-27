@@ -20,7 +20,7 @@ func NewTransactionRepository(db *gorm.DB) *TransactionRepository {
 	return &TransactionRepository{db: db}
 }
 
-func (r *TransactionRepository) CreateTransaction(data model.CreateTransaction) (error, int) {
+func (r *TransactionRepository) CreateTransaction(data model.CreateTransaction, userId string) (error, int) {
 	var product model.Product
 
 	result := r.db.Where("products.id = ?", data.ProductId).Joins("Stock").First(&product)
@@ -44,6 +44,7 @@ func (r *TransactionRepository) CreateTransaction(data model.CreateTransaction) 
 		TransactionType: data.TransactionType,
 		Quantity: data.Quantity,
 		CreatedAt: createdAt,
+		UserId: userId,
 	}
 
 	result = tx.Model(&transaction).Create(transaction)
