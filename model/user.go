@@ -13,7 +13,7 @@ type User struct {
 	ImgUrl    string
 	CreatedAt time.Time
 
-	Product *Product `gorm:"foreignKey:UserId"`
+	Product []Product `gorm:"foreignKey:UserId"`
 }
 
 type Claims struct {
