@@ -81,6 +81,7 @@ func (r *ProductRepository) CreateProduct(dataProduct model.CreateProduct, userI
 			TransactionType: model.TransactionIN,
 			Quantity:        helper.AbsDiff(dataProduct.Stock, product.Stock.StockPerButir),
 			CreatedAt:       time.Now(),
+			UserId:          userId,
 		}
 
 		resultTransaction := tx.Model(&transaction).Create(transaction)
@@ -131,6 +132,7 @@ func (r *ProductRepository) CreateProduct(dataProduct model.CreateProduct, userI
 		TransactionType: model.TransactionOUT,
 		Quantity:        dataProduct.Stock,
 		CreatedAt:       time.Now(),
+		UserId:          userId,
 	}
 
 	resultTransaction := tx.Model(&transaction).Create(transaction)
