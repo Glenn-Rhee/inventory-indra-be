@@ -5,42 +5,43 @@ import "time"
 type TransactionType string
 
 const (
-	TransactionIN	TransactionType = "IN"
-	TransactionOUT 	TransactionType = "OUT"
+	TransactionIN  TransactionType = "IN"
+	TransactionOUT TransactionType = "OUT"
 )
 
 type Transaction struct {
-	Id              string 				`gorm:"primaryKey;type:varchar(255)"`
-	ProductId       string 				`gorm:"type:varchar(255)"`
-	TransactionType TransactionType 	`gorm:"not null"`
-	Quantity        int    				`gorm:"not null"`
-	CreatedAt       time.Time	
-
-	Product			*Product			`gorm:"foreignKey:ProductId"`
+	Id              string          `gorm:"primaryKey;type:varchar(255)"`
+	ProductId       string          `gorm:"type:varchar(255)"`
+	TransactionType TransactionType `gorm:"not null"`
+	Quantity        int             `gorm:"not null"`
+	CreatedAt       time.Time
+	UserId          string   `gorm:"type:varchar(255)"`
+	Product         *Product `gorm:"foreignKey:ProductId"`
+	User            *User    `gorm:"foreignKey:UserId"`
 }
 
 type CreateTransaction struct {
-	ProductId 		string				`json:"productId" binding:"required,min=5,max=100"`
-	TransactionType TransactionType		`json:"transactionType" binding:"required,oneof=IN OUT"`
-	Quantity		int					`json:"quantity" binding:"required,min=1"`
-	Price			int					`json:"price" binding:"required,min=100"`
-	ExpiredDate		*time.Time			`json:"expiredDate"`
+	ProductId       string          `json:"productId" binding:"required,min=5,max=100"`
+	TransactionType TransactionType `json:"transactionType" binding:"required,oneof=IN OUT"`
+	Quantity        int             `json:"quantity" binding:"required,min=1"`
+	Price           int             `json:"price" binding:"required,min=100"`
+	ExpiredDate     *time.Time      `json:"expiredDate"`
 }
 
 type GetTransaction struct {
-	TotalTransaction	int
-	TotalRevenue		int
-	TotalPurchase		int
-	TotalPages			int
-	Transactions		[]TransactionResponse
+	TotalTransaction int
+	TotalRevenue     int
+	TotalPurchase    int
+	TotalPages       int
+	Transactions     []TransactionResponse
 }
 
 type TransactionResponse struct {
-	Id 					string
-	ProductName			string
-	TransactionType		TransactionType
-	Quantity			int
-	Price				int64
-	TotalPrice			int64
-	TransactionDate		time.Time
+	Id              string
+	ProductName     string
+	TransactionType TransactionType
+	Quantity        int
+	Price           int64
+	TotalPrice      int64
+	TransactionDate time.Time
 }
