@@ -39,12 +39,12 @@ func (r *TransactionRepository) CreateTransaction(data model.CreateTransaction, 
 	var idTransaction = createdAt.Format("TX-02012006-150405")
 
 	transaction := model.Transaction{
-		Id: idTransaction,
-		ProductId: product.Id,
+		Id:              idTransaction,
+		ProductId:       product.Id,
 		TransactionType: data.TransactionType,
-		Quantity: data.Quantity,
-		CreatedAt: createdAt,
-		UserId: userId,
+		Quantity:        data.Quantity,
+		CreatedAt:       createdAt,
+		UserId:          userId,
 	}
 
 	result = tx.Model(&transaction).Create(transaction)
@@ -66,11 +66,11 @@ func (r *TransactionRepository) CreateTransaction(data model.CreateTransaction, 
 		stockLeft = product.Stock.StockPerButir + data.Quantity
 	}
 
-
-	result = tx.Model(&model.Stock{}).Where("product_id = ?", product.Id).Updates(model.Stock{
-		StockPerButir: stockLeft,
-		LastUpdate: time.Now(),
-	})
+	result = tx.Model(&model.Stock{}).Where("product_id = ?", product.Id).
+		Updates(map[string]interface{}{
+			"stock_per_butir": stockLeft,
+			"last_update":     time.Now(),
+		})
 	if result.Error != nil {
 		tx.Rollback()
 		log.Println("Error while update stock:", result.Error.Error())
@@ -84,7 +84,7 @@ func (r *TransactionRepository) CreateTransaction(data model.CreateTransaction, 
 		}
 
 		result = tx.Model(&model.Product{}).Where("id = ?", product.Id).Updates(model.Product{
-			ExpiredDate: *data.ExpiredDate,
+			ExpiredDate:   *data.ExpiredDate,
 			PricePerButir: data.Price,
 		})
 
@@ -100,9 +100,9 @@ func (r *TransactionRepository) CreateTransaction(data model.CreateTransaction, 
 }
 
 type GetTransactionParams struct {
-	Limit 	int
-	Page 	int
-	Filter 	string
+	Limit  int
+	Page   int
+	Filter string
 }
 
 func (r *TransactionRepository) GetTransaction(params GetTransactionParams) (model.GetTransaction, error, int) {
@@ -116,20 +116,20 @@ func (r *TransactionRepository) GetTransaction(params GetTransactionParams) (mod
 
 	if params.Filter != "" {
 		query = query.Where(
-			"transactions.id = ? OR products.name ILIKE ? OR transactions.transaction_type::text ILIKE ?", 
-			params.Filter, 
-			"%" + params.Filter + "%",
-			"%" + params.Filter + "%",
+			"transactions.id = ? OR products.name ILIKE ? OR transactions.transaction_type::text ILIKE ?",
+			params.Filter,
+			"%"+params.Filter+"%",
+			"%"+params.Filter+"%",
 		)
 	}
 
 	query.Count(&totalRows)
-	
+
 	result := query.Order("transactions.created_at DESC").
-				Limit(params.Limit).
-				Offset(offset).
-				Find(&transactions)
-	
+		Limit(params.Limit).
+		Offset(offset).
+		Find(&transactions)
+
 	if result.Error != nil {
 		log.Println("Error while get data transaction:", result.Error.Error())
 		return model.GetTransaction{}, errors.New("An error while get data transaction! Please try again later!"), http.StatusInternalServerError
@@ -148,21 +148,21 @@ func (r *TransactionRepository) GetTransaction(params GetTransactionParams) (mod
 		}
 
 		transactionsResponse[i] = model.TransactionResponse{
-			Id: transaction.Id,
-			ProductName: transaction.Product.Name,
+			Id:              transaction.Id,
+			ProductName:     transaction.Product.Name,
 			TransactionType: transaction.TransactionType,
-			Quantity: transaction.Quantity,
-			Price:int64(transaction.Product.PricePerButir),
-			TotalPrice: int64(totalPrice),
+			Quantity:        transaction.Quantity,
+			Price:           int64(transaction.Product.PricePerButir),
+			TotalPrice:      int64(totalPrice),
 			TransactionDate: transaction.CreatedAt,
 		}
 	}
 
 	return model.GetTransaction{
 		TotalTransaction: int(totalRows),
-		TotalRevenue: totalRevenue,
-		TotalPurchase: totalPurchase,
-		Transactions: transactionsResponse,
-		TotalPages: totalPages,
+		TotalRevenue:     totalRevenue,
+		TotalPurchase:    totalPurchase,
+		Transactions:     transactionsResponse,
+		TotalPages:       totalPages,
 	}, nil, http.StatusOK
 }
