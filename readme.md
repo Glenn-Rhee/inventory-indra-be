@@ -6,17 +6,17 @@ REST API backend untuk sistem manajemen inventaris, dibangun menggunakan **Go** 
 
 ## Tech Stack
 
-| Layer | Teknologi |
-|---|---|
-| Language | Go 1.25 |
-| Framework | Gin |
-| ORM | GORM |
-| Database | PostgreSQL (via `pgx/v5`) |
-| Migration | Goose |
-| Auth | JWT (`golang-jwt/jwt v5`) |
-| Excel Export | Excelize v2 |
-| Environment | godotenv |
-| CORS | gin-contrib/cors |
+| Layer        | Teknologi                 |
+| ------------ | ------------------------- |
+| Language     | Go 1.25                   |
+| Framework    | Gin                       |
+| ORM          | GORM                      |
+| Database     | PostgreSQL (via `pgx/v5`) |
+| Migration    | Goose                     |
+| Auth         | JWT (`golang-jwt/jwt v5`) |
+| Excel Export | Excelize v2               |
+| Environment  | godotenv                  |
+| CORS         | gin-contrib/cors          |
 
 ---
 
@@ -46,42 +46,42 @@ Server berjalan di port **`:8080`**.
 
 ### Auth & User
 
-| Method | Endpoint | Middleware | Deskripsi |
-|--------|----------|------------|-----------|
-| `POST` | `/user` | — | Registrasi pengguna baru |
-| `POST` | `/login` | — | Login dan mendapatkan token |
-| `PATCH` | `/user` | — | Update data pengguna |
-| `GET` | `/user` | TokenMiddleware | Ambil data pengguna yang sedang login |
+| Method  | Endpoint | Middleware      | Deskripsi                             |
+| ------- | -------- | --------------- | ------------------------------------- |
+| `POST`  | `/user`  | —               | Registrasi pengguna baru              |
+| `POST`  | `/login` | —               | Login dan mendapatkan token           |
+| `PATCH` | `/user`  | —               | Update data pengguna                  |
+| `GET`   | `/user`  | TokenMiddleware | Ambil data pengguna yang sedang login |
 
 ### Produk
 
-| Method | Endpoint | Middleware | Deskripsi |
-|--------|----------|------------|-----------|
-| `POST` | `/product` | HandlerMiddleware | Tambah produk baru |
-| `GET` | `/product` | HandlerMiddleware | Ambil daftar produk |
-| `PATCH` | `/product` | HandlerMiddleware | Update data produk |
-| `DELETE` | `/product` | HandlerMiddleware | Hapus produk |
+| Method   | Endpoint   | Middleware        | Deskripsi           |
+| -------- | ---------- | ----------------- | ------------------- |
+| `POST`   | `/product` | HandlerMiddleware | Tambah produk baru  |
+| `GET`    | `/product` | HandlerMiddleware | Ambil daftar produk |
+| `PATCH`  | `/product` | HandlerMiddleware | Update data produk  |
+| `DELETE` | `/product` | HandlerMiddleware | Hapus produk        |
 
 ### Stok
 
-| Method | Endpoint | Middleware | Deskripsi |
-|--------|----------|------------|-----------|
-| `GET` | `/stock` | HandlerMiddleware | Ambil data stok |
+| Method | Endpoint | Middleware        | Deskripsi       |
+| ------ | -------- | ----------------- | --------------- |
+| `GET`  | `/stock` | HandlerMiddleware | Ambil data stok |
 
 ### Transaksi
 
-| Method | Endpoint | Middleware | Deskripsi |
-|--------|----------|------------|-----------|
-| `POST` | `/transaction` | HandlerMiddleware | Buat transaksi baru |
-| `GET` | `/transaction` | HandlerMiddleware | Ambil riwayat transaksi |
+| Method | Endpoint       | Middleware        | Deskripsi               |
+| ------ | -------------- | ----------------- | ----------------------- |
+| `POST` | `/transaction` | HandlerMiddleware | Buat transaksi baru     |
+| `GET`  | `/transaction` | HandlerMiddleware | Ambil riwayat transaksi |
 
 ### Statistik & Laporan
 
-| Method | Endpoint | Middleware | Deskripsi |
-|--------|----------|------------|-----------|
-| `GET` | `/stats` | HandlerMiddleware | Ambil data statistik |
-| `GET` | `/stats/medicine` | HandlerMiddleware | Export data produk ke Excel |
-| `GET` | `/stats/reports` | HandlerMiddleware | Export laporan ke Excel |
+| Method | Endpoint          | Middleware        | Deskripsi                   |
+| ------ | ----------------- | ----------------- | --------------------------- |
+| `GET`  | `/stats`          | HandlerMiddleware | Ambil data statistik        |
+| `GET`  | `/stats/medicine` | HandlerMiddleware | Export data produk ke Excel |
+| `GET`  | `/stats/reports`  | HandlerMiddleware | Export laporan ke Excel     |
 
 ---
 
@@ -160,7 +160,3 @@ Proyek ini adalah backend dari aplikasi inventory. Frontend-nya dapat ditemukan 
 🔗 `https://inventory-indra.vercel.app`
 
 ---
-
-## Lisensi
-
-Proyek ini tidak memiliki lisensi yang tercantum secara eksplisit. Hubungi pemilik repositori untuk informasi lebih lanjut.
