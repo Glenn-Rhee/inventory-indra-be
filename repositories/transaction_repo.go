@@ -54,7 +54,7 @@ func (r *TransactionRepository) CreateTransaction(data model.CreateTransaction, 
 		return errors.New("An error while create transaction! Please try again later"), http.StatusInternalServerError
 	}
 
-	if product.Stock.StockPerButir == 0 {
+	if data.TransactionType == model.TransactionIN && product.Stock.StockPerButir == 0 {
 		tx.Rollback()
 		return fmt.Errorf("Stock of %s is empty. Please restock!", product.Name), http.StatusBadRequest
 	}
