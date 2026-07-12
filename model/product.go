@@ -4,14 +4,6 @@ import (
 	"time"
 )
 
-type ExpiredStatus string
-
-const (
-	StatusSafe    ExpiredStatus = "SAFE"
-	StatusWarning ExpiredStatus = "WARNING"
-	StatusExpired ExpiredStatus = "EXPIRED"
-)
-
 type Category string
 
 const (
@@ -35,6 +27,14 @@ type Product struct {
 	Stock       *Stock        `gorm:"foreignKey:ProductId;constraint:OnDelete:CASCADE"`
 	Transaction []Transaction `gorm:"foreignKey:ProductId"`
 }
+
+type ExpiredStatus string
+
+const (
+	StatusSafe    ExpiredStatus = "SAFE"
+	StatusWarning ExpiredStatus = "WARNING"
+	StatusExpired ExpiredStatus = "EXPIRED"
+)
 
 type CreateProduct struct {
 	Name          string    `json:"name" binding:"required,min=5,max=100"`
